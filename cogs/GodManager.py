@@ -1,14 +1,11 @@
 import random
-
 import discord
-from discord import Embed
 from discord.ext import commands
-
 import database
 from Util import logger
 
 
-class GodManager(commands.Cog, name="Gods"):
+class GodManager(commands.Cog, name="Religion Management"):
     def __init__(self, bot):
         self.bot = bot
         self.godtypes = [("FROST", discord.Color.blue()),
@@ -23,16 +20,18 @@ class GodManager(commands.Cog, name="Gods"):
                          ("WISDOM", discord.Color.dark_purple()),
                          ("NATURE", discord.Color.green())]
 
+    # ------------ GOD MANAGEMENT ------------ #
+
     @commands.command(name="create", aliases=["newgod"])
     async def _create(self, ctx, *args):
         """Creates a new God"""
         user = ctx.author
 
-        if database.isBeliever(user.id, ctx.guild.id):
+        if database.getBeliever(user.id, ctx.guild.id):
             await ctx.send("You are already in a God, please leave it to create a new one using `/gods leave`!")
             return
 
-        if database.godExists(args[0], ctx.guild.id):
+        if database.getGodName(args[0], ctx.guild.id):
             await ctx.send("A God with that name already exists!")
             return
 
@@ -48,57 +47,63 @@ class GodManager(commands.Cog, name="Gods"):
         else:
             await ctx.send("Boohoo, God creation failed...")
 
-    @commands.command(name="leave", aliases=["yeet"])
-    async def _leave(self, ctx):
-        """Leaves a God"""
-        user = ctx.author
-
-        if not database.isBeliever(user.id, ctx.guild.id):
+    @classmethod
+    async def isBelieverAndPriest(cls, ctx):
+        believer = database.getBeliever(ctx.author.id, ctx.guild.id)
+        if not believer:
             await ctx.send("You are not believing in a God!")
-            return
+            return False
 
-        if database.leaveGod(user.id, ctx.guild.id):
-            await ctx.send("You've left your god!")
-        else:
-            await ctx.send("Something went wrong...")
+        god = database.getGod(believer.God)
+        if not god.Priest or god.Priest != believer.ID:
+            await ctx.send("You are not a priest!")
+            return False
 
-    @commands.command(name="join", aliases=["enter"])
-    async def _join(self, ctx):
-        """Joins a God"""
-        user = ctx.author
+        return god
 
-        await ctx.send("yes")
+    @commands.command(name="access", aliases=["lock", "open"])
+    async def _access(self, ctx):
+        """Set your religion as open or invite only"""
+        god = await self.isBelieverAndPriest(ctx)
 
-    @commands.command(name="info", aliases=["godinfo"])
-    async def _info(self, ctx, arg1):
-        """Gets information about a God"""
-        god = database.godExists(arg1, ctx.guild.id)
+        if god:
+            if database.toggleAccess(god.ID):
+                await ctx.send("God is now Invite Only!")
+            else:
+                await ctx.send("God is now Open!")
 
-        if not god:
-            await ctx.send("That God doesn't exist!")
-            return
+    @commands.command(name="ally", aliases=["friend"])
+    async def _ally(self, ctx):
+        """Toggles alliance with another religion - Not done"""
+        logger.logDebug("yes")
 
-        embedcolor = discord.Color.green()
-        if god.Type:
-            for type, color in self.godtypes:
-                if type == god.Type:
-                    embedcolor = color
+    @commands.command(name="war", aliases=["enemy"])
+    async def _war(self, ctx):
+        """Toggles war with another religion - Not done"""
+        logger.logDebug("yes")
 
-        if god.Description:
-            embed = discord.Embed(title="God Information", color=embedcolor,
-                                  description=god.Description)
-        else:
-            embed = discord.Embed(title="God Information", color=embedcolor)
-        embed.add_field(name="Creation Date",
-                        value="%s" % god.CreationDate.strftime(
-                            "%Y-%m-%d %H:%M:%S"), inline=True)
-        believers = database.getBelieversByID(god.ID)
-        if not believers:
-            believers = []
-        embed.add_field(name="Believers", value="%s" % len(believers), inline=True)
-        embed.set_footer(text="God Information for: %s" % god.Name,
-                         icon_url=ctx.author.avatar_url)
-        await ctx.send(embed=embed)
+    @commands.command(name="description", aliases=["desc"])
+    async def _description(self, ctx, *args):
+        """Sets a description for your religion"""
+        god = await self.isBelieverAndPriest(ctx)
+
+        if god:
+            desc = ""
+            for arg in args:
+                desc = desc + " " + arg
+            desc.strip()
+
+            if len(desc) > 100:
+                await ctx.send("Keep your description under 100 chars, please.")
+                return
+
+            database.setDesc(god.ID, desc)
+            await ctx.send("Description set successfully!")
+
+    @commands.command(name="invite", aliases=["inv"])
+    async def _invite(self, ctx):
+        """Invite someone to your religion - Not done"""
+        logger.logDebug("yes")
 
 
 def setup(bot):

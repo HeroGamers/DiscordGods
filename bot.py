@@ -21,13 +21,13 @@ except ImportError:
 
 bot = commands.Bot(command_prefix=(os.getenv('prefix')+"gods ", os.getenv('prefix')+"g "),
                    description='Religion has never been easier!',
-                   activity=discord.Game(name="with religions | " + os.getenv('prefix') + "gods help"))
+                   activity=discord.Game(name="with " + str(len(database.getBelieversGlobal())) + " believers | " + os.getenv('prefix') + "gods help"))
 
 
-startup_extensions = ["essentials",
-                      "info",
-                      "listenerCog",
-                      "GodManager"]
+startup_extensions = ["BotManager",
+                      "GodManager",
+                      "BelieverManager",
+                      "Info"]
 
 
 @bot.event
