@@ -3,22 +3,12 @@ import discord
 from discord.ext import commands
 import database
 from Util import logger
+from Util.botutils import botutils
 
 
 class GodManager(commands.Cog, name="Religion Management"):
     def __init__(self, bot):
         self.bot = bot
-        self.godtypes = [("FROST", discord.Color.blue()),
-                         ("LOVE", discord.Color.red()),
-                         ("EVIL", discord.Color.darker_grey()),
-                         ("SEA", discord.Color.dark_blue()),
-                         ("MOON", discord.Color.light_grey()),
-                         ("SUN", discord.Color.dark_orange()),
-                         ("THUNDER", discord.Color.orange()),
-                         ("PARTY", discord.Color.magenta()),
-                         ("WAR", discord.Color.dark_red()),
-                         ("WISDOM", discord.Color.dark_purple()),
-                         ("NATURE", discord.Color.green())]
 
     # ------------ GOD MANAGEMENT ------------ #
 
@@ -36,9 +26,9 @@ class GodManager(commands.Cog, name="Religion Management"):
             return
 
         if len(args) > 1:
-            god = database.newGod(ctx.guild.id, args[0], random.choice(self.godtypes)[0], args[1])
+            god = database.newGod(ctx.guild.id, args[0], random.choice(botutils.godtypes)[0], args[1])
         else:
-            god = database.newGod(ctx.guild.id, args[0], random.choice(self.godtypes)[0])
+            god = database.newGod(ctx.guild.id, args[0], random.choice(botutils.godtypes)[0])
         if god.ID:
             await ctx.send("God created!")
             believer = database.newBeliever(user.id, god)
@@ -101,9 +91,40 @@ class GodManager(commands.Cog, name="Religion Management"):
             await ctx.send("Description set successfully!")
 
     @commands.command(name="invite", aliases=["inv"])
-    async def _invite(self, ctx):
-        """Invite someone to your religion - Not done"""
-        logger.logDebug("yes")
+    async def _invite(self, ctx, arg1):
+        """Invite someone to your religion"""
+        god = await self.isBelieverAndPriest(ctx)
+        if god:
+            user = await botutils.getUser(self.bot, ctx.guild, arg1)
+
+            if not user:
+                await ctx.send("User not found!")
+                return
+
+            if user.bot:
+                await ctx.send("Sorry, but I don't think the bot is going to respond to your invitation...")
+                return
+
+            if not ctx.guild.get_member(user.id):
+                await ctx.send("The user is not in this server!")
+                return
+
+            believer = database.getBeliever(user.id, ctx.guild.id)
+            if believer:
+                if believer.God.ID == god.ID:
+                    await ctx.send(user.name + " is already in your religion!")
+                    return
+
+            invite = database.getInvite(user.id, god.ID)
+            if invite:
+                await ctx.send("You already have an active invite for this user to join your God! Tell them to join!")
+                return
+
+            if database.newInvite(god.ID, user.id):
+                await ctx.send("An invite to your religion has been sent to the user!\n"
+                               "*Invites will become invalid 24 hours after being issued.*")
+            else:
+                await ctx.send("Creating the invite failed!")
 
 
 def setup(bot):

@@ -1,5 +1,5 @@
 from peewee import SqliteDatabase, Model, CharField, DateTimeField, AutoField, ForeignKeyField, SmallIntegerField, \
-    BooleanField, IntegerField
+    BooleanField, IntegerField, BitField
 import datetime
 from Util import logger
 
@@ -20,7 +20,7 @@ class gods(Model):
     ID = AutoField()
     Guild = CharField(max_length=snowflake_max_length)
     Name = CharField(max_length=godname_max_length)
-    Gender = CharField(null=True, max_length=15)
+    Gender = CharField(null=True, max_length=19)
     Type = CharField(max_length=10)
     Mood = SmallIntegerField(null=True, default=0)
     Power = CharField(max_length=5, default="1")
@@ -40,6 +40,7 @@ def newGod(guild, name, type, gender=None):
         return god
     except Exception as e:
         logger.logDebug("Error doing new marriage - " + str(e), "ERROR")
+        return False
 
 
 # Get a God's believers, using name and guild
@@ -147,6 +148,7 @@ def newBeliever(userid, god):
         return believer
     except Exception as e:
         logger.logDebug("Error doing new marriage - " + str(e), "ERROR")
+        return False
 
 
 # Whether a believer already believes in a god on that guild, if yes, returns believer
@@ -210,6 +212,7 @@ def newMarriage(believer1, believer2, god):
         return marriage
     except Exception as e:
         logger.logDebug("Error doing new marriage - " + str(e), "ERROR")
+        return False
 
 
 # Gets all Marriages in a guild
@@ -219,8 +222,8 @@ def getMarriages(guild):
 
 
 # Get someone's marriage
-def getMarriage(believerid, guild):
-    query = marriages.select().join(gods).where(gods.Guild.contains(str(guild))).where(marriages.Believer1.contains(believerid) | marriages.Believer2.contains(believerid))
+def getMarriage(believerid):
+    query = marriages.select().where(marriages.Believer1.contains(believerid) | marriages.Believer2.contains(believerid))
     if query.exists():
         return query[0]
     return False
@@ -236,12 +239,108 @@ def deleteMarriage(marriageid):
     return False
 
 
+# Show someone love
+def doLove(marriageid):
+    date = datetime.datetime.now()
+
+    query = marriages.update(LoveDate=date).where(marriages.ID.contains(marriageid))
+    query.execute()
+
+
+# --------------------------------------- Offers [Invitations / PriestOffers] --------------------------------------- #
+
+
+# The Offers Table
+class offers(Model):
+    ID = AutoField()
+    Type = BitField()
+    God = ForeignKeyField(gods)
+    UserID = CharField(max_length=snowflake_max_length)
+    CreationDate = DateTimeField(default=datetime.datetime.now())
+
+    class Meta:
+        database = db
+
+
+# Adding new invite to the DB
+def newInvite(godid, userid):
+    try:
+        invite = offers.create(God=godid, Type=1, UserID=userid)
+        return invite
+    except Exception as e:
+        logger.logDebug("Error doing new invite - " + str(e), "ERROR")
+        return False
+
+
+# Get someone's invite for a god
+def getInvite(userid, godid):
+    query = offers.select().where(offers.Type == 1 & offers.UserID.contains(userid) & offers.God.contains(godid))
+    if query.exists():
+        return query[0]
+    return False
+
+
+# Clears expired invites
+def clearExpiredInvites():
+    today = datetime.datetime.today()
+    query = offers.delete().where(offers.Type == 1 & offers.CreationDate < today)
+    query.execute()
+
+
+# Delete an invite // used after an invite has been used
+def deleteInvite(offerid):
+    invite = offers.select().where(offers.Type == 1 & offers.ID.contains(offerid))
+    if invite.exists():
+        query = invite[0].delete_instance()
+        if query == 1:
+            return True
+    return False
+
+
+# Adding new priest offer to the DB
+def newPriestOffer(godid, userid):
+    try:
+        priestoffer = offers.create(God=godid, Type=2, UserID=userid)
+        return priestoffer
+    except Exception as e:
+        logger.logDebug("Error doing new priestoffer - " + str(e), "ERROR")
+        return False
+
+
+# Get someone's priest offer for a god
+def getPriestOffer(userid, godid):
+    query = offers.select().where(offers.Type == 2 & offers.UserID.contains(userid) & offers.God.contains(godid))
+    if query.exists():
+        return query[0]
+    return False
+
+
+# Delete a priest offer // used after a priest offer has been used
+def deletePriestOffer(offerid):
+    priestoffer = offers.select().where(offers.Type == 2 & offers.ID.contains(offerid))
+    if priestoffer.exists():
+        query = priestoffer[0].delete_instance()
+        if query == 1:
+            return True
+    return False
+
+
+# Get and clear old priest offers
+def clearOldPriestOffers(date):
+    priestOffers = offers.select().where(offers.Type == 2 & offers.CreationDate < date)
+    if priestOffers.exists():
+        query = offers.delete().where(offers.Type == 2 & offers.CreationDate < date)
+        query.execute()
+        return priestOffers
+    return False
+
+
 # -------------------------------------------------- SETUP OF TABLES ------------------------------------------------- #
 
 
 def create_tables():
     with db:
-        db.create_tables([gods, believers, marriages])
+        db.create_tables([gods, believers, marriages, offers])
 
 
 create_tables()

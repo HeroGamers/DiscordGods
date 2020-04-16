@@ -6,7 +6,7 @@ import dbl
 from Util import logger
 
 
-class botlists(commands.Cog):
+class BotLists(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.topgg_token = os.getenv('top.gg_token')  # https://top.gg/
@@ -68,4 +68,4 @@ class botlists(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(botlists(bot))
+    bot.add_cog(BotLists(bot))
