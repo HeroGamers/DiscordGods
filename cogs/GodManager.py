@@ -21,6 +21,10 @@ class GodManager(commands.Cog, name="Religion Management"):
             await ctx.send("You are already in a God, please leave it to create a new one using `/gods leave`!")
             return
 
+        if len(args) <_g 1:
+            await ctx.send("Please give your God a name!")
+            return
+
         if database.getGodName(args[0], ctx.guild.id):
             await ctx.send("A God with that name already exists!")
             return
@@ -29,11 +33,11 @@ class GodManager(commands.Cog, name="Religion Management"):
             await ctx.send("Please choose a name that's not longer than 16 characters!")
             return
 
-        if len(args[1]) > 19:
-            await ctx.send("Please choose a gender that's not longer than 19 characters!")
-            return
-
         if len(args) > 1:
+            if len(args[1]) > 19:
+                await ctx.send("Please choose a gender that's not longer than 19 characters!")
+                return
+
             god = database.newGod(ctx.guild.id, args[0], random.choice(botutils.godtypes)[0], args[1])
         else:
             god = database.newGod(ctx.guild.id, args[0], random.choice(botutils.godtypes)[0])
