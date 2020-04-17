@@ -59,14 +59,6 @@ def getBelieversByID(god):
     return False
 
 
-# Get believers, globally
-def getBelieversGlobal():
-    query = believers.select()
-    if query.exists():
-        return query
-    return False
-
-
 # See if a god already exists with that name in a guild
 def getGodName(name, guild):
     query = gods.select().where((gods.Guild.contains(str(guild)) & gods.Name.contains(str(name))))
@@ -87,6 +79,12 @@ def getGod(godid):
 # Gets all Gods in a guild
 def getGods(guild):
     query = gods.select().where(gods.Guild.contains(str(guild))).order_by(gods.Power)
+    return query
+
+
+# Gets top 50 Gods globally
+def getGodsGlobal():
+    query = gods.select().order_by(gods.Power).limit(50)
     return query
 
 
@@ -194,6 +192,14 @@ def getBelieverByID(believerID):
     return False
 
 
+# Get top 50 believers, globally
+def getBelieversGlobal():
+    query = believers.select().sort(believers.PrayerPower).limit(50)
+    if query.exists():
+        return query
+    return False
+
+
 # Leave a god
 def leaveGod(userid, guild):
     believer = getBeliever(userid, guild)
@@ -201,6 +207,12 @@ def leaveGod(userid, guild):
     if query == 1:
         return True
     return False
+
+
+# Believer set to another god
+def setGod(believerid, godid):
+    query = believers.update(God=godid).where(believers.ID.contains(believerid))
+    query.execute()
 
 
 # Prays
@@ -255,6 +267,12 @@ def newMarriage(believer1, believer2, god):
 # Gets all Marriages in a guild
 def getMarriages(guild):
     query = marriages.select().join(gods).where(gods.Guild.contains(str(guild))).order_by(marriages.LoveDate)
+    return query
+
+
+# Gets top 50 Marriages globally
+def getMarriagesGlobal():
+    query = marriages.select().order_by(marriages.LoveDate).limit(50)
     return query
 
 
