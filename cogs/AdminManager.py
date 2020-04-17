@@ -109,7 +109,7 @@ class AdminManager(commands.Cog, name="Admin Religion Management"):
                 if believer.God.ID != god.ID:
                     database.setGod(believer.ID, god.ID)
             else:
-                database.newBeliever(user.id, god.ID)
+                believer = database.newBeliever(user.id, god.ID)
 
             database.setPriest(god.ID, believer.ID)
 
