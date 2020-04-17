@@ -1,5 +1,5 @@
-from peewee import SqliteDatabase, Model, CharField, DateTimeField, AutoField, ForeignKeyField, SmallIntegerField, \
-    BooleanField, IntegerField, BitField, FloatField
+from peewee import SqliteDatabase, Model, CharField, DateTimeField, AutoField, ForeignKeyField, BooleanField, \
+    IntegerField, BitField, FloatField
 import datetime
 from Util import logger
 

@@ -54,7 +54,6 @@ def hasOffer(ctx):
     return False
 
 
-
 class botutils():
     godtypes = [("FROST", discord.Color.blue()),
                 ("LOVE", discord.Color.red()),

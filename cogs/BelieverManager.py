@@ -6,7 +6,7 @@ from discord.ext import commands
 import database
 from Util import logger
 from Util.botutils import botutils
-from Util import botutils
+from Util import botutils as utilchecks
 
 
 class BelieverManager(commands.Cog, name="Believer"):
@@ -33,7 +33,7 @@ class BelieverManager(commands.Cog, name="Believer"):
     # ------------ BELIEVER INTERACTIONS WITH A RELIGION/GOD ------------ #
 
     @commands.command(name="leave", aliases=["yeet"])
-    @commands.check(botutils.isBeliever)
+    @commands.check(utilchecks.isBeliever)
     async def _leave(self, ctx):
         """Leaves a religion"""
         user = ctx.author
@@ -59,7 +59,7 @@ class BelieverManager(commands.Cog, name="Believer"):
             await ctx.send("Something went wrong...")
 
     @commands.command(name="join", aliases=["enter"])
-    @commands.check(botutils.isNotBeliever)
+    @commands.check(utilchecks.isNotBeliever)
     async def _join(self, ctx, arg1):
         """Joins a religion"""
         believer = database.getBeliever(ctx.author.id, ctx.guild.id)
@@ -97,7 +97,7 @@ class BelieverManager(commands.Cog, name="Believer"):
             logger.logDebug("God already had a preist or a priest offer")
 
     @commands.command(name="no", aliases=["deny", "decline", "reject"])
-    @commands.check(botutils.hasOffer)
+    @commands.check(utilchecks.hasOffer)
     async def _no(self, ctx):
         """Reject a proposal from your God"""
         believer = database.getBeliever(ctx.author.id, ctx.guild.id)
@@ -108,7 +108,7 @@ class BelieverManager(commands.Cog, name="Believer"):
         await botutils.doNewPriestOffer(self.bot, priestoffer.God, priestoffer)
 
     @commands.command(name="yes", aliases=["accept"])
-    @commands.check(botutils.hasOffer)
+    @commands.check(utilchecks.hasOffer)
     async def _yes(self, ctx):
         """Accept a proposal from your God"""
         believer = database.getBeliever(ctx.author.id, ctx.guild.id)
@@ -120,7 +120,7 @@ class BelieverManager(commands.Cog, name="Believer"):
                        "Priest of " + believer.God.Name + "!")
 
     @commands.command(name="pray", aliases=["p"])
-    @commands.check(botutils.isBeliever)
+    @commands.check(utilchecks.isBeliever)
     async def _pray(self, ctx):
         """Pray to your God"""
         believer = database.getBeliever(ctx.author.id, ctx.guild.id)
@@ -144,7 +144,7 @@ class BelieverManager(commands.Cog, name="Believer"):
     # ------------ BELIEVER RELATIONSHIPS ------------ #
 
     @commands.command(name="marry", aliases=["propose"])
-    @commands.check(botutils.isBeliever)
+    @commands.check(utilchecks.isBeliever)
     async def _marry(self, ctx, arg1):
         """Marry that special someone"""
         guildid = ctx.guild.id
@@ -210,7 +210,7 @@ class BelieverManager(commands.Cog, name="Believer"):
                 await message.edit(content="", embed=embed)
 
     @commands.command(name="divorce", aliases=["leave_with_the_kids"])
-    @commands.check(botutils.isMarried)
+    @commands.check(utilchecks.isMarried)
     async def _divorce(self, ctx):
         """Leave your special someone and take the kids with you"""
         believer = database.getBeliever(ctx.author.id, ctx.guild.id)
@@ -235,7 +235,7 @@ class BelieverManager(commands.Cog, name="Believer"):
             await ctx.send(ctx.author.name + " just divorced " + lover.name + "!")
 
     @commands.command(name="love", aliases=["kiss"])
-    @commands.check(botutils.isMarried)
+    @commands.check(utilchecks.isMarried)
     async def _love(self, ctx):
         """Shows your special someone that you love them"""
         believer = database.getBeliever(ctx.author.id, ctx.guild.id)

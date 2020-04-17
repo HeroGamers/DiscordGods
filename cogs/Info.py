@@ -1,8 +1,6 @@
 import discord
 from discord.ext import commands
-
 import database
-from Util import logger
 from Util.botutils import botutils
 
 
