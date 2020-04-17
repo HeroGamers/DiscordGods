@@ -21,7 +21,7 @@ class GodManager(commands.Cog, name="Religion Management"):
             await ctx.send("You are already in a God, please leave it to create a new one using `/gods leave`!")
             return
 
-        if len(args) <_g 1:
+        if len(args) < 1:
             await ctx.send("Please give your God a name!")
             return
 
