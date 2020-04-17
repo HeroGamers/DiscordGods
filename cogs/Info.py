@@ -70,6 +70,9 @@ class Info(commands.Cog, name="Information"):
             await ctx.send("There are no Gods in " + ctx.guild.name + ", yet... `/gods create <name>`")
             return
 
+        gods = list(gods)
+        gods.reverse()
+
         i = 1
         godlist = ""
 
@@ -100,6 +103,9 @@ class Info(commands.Cog, name="Information"):
         if not marriages:
             await ctx.send("There are no Marriages in " + ctx.guild.name + ", yet... `/gods marry <someone special>`")
             return
+
+        marriages = list(marriages)
+        marriages.reverse()
 
         i = 1
         marriagelist = ""

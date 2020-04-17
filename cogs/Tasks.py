@@ -12,16 +12,19 @@ import datetime
 class Tasks(commands.Cog, name="Tasks"):
     def __init__(self, bot):
         self.bot = bot
-        self.doPresenceUpdate.start()
+
+        self.firstrundone = False
+
         self.doFalloffs.start()
         self.clearOldInvites.start()
         self.priestTask.start()
+        self.doPresenceUpdate.start()
 
     def cog_unload(self):
-        self.doPresenceUpdate.cancel()
         self.doFalloffs.cancel()
         self.clearOldInvites.cancel()
         self.priestTask.cancel()
+        self.doPresenceUpdate.cancel()
 
     # ------------ PLUGIN TASKS ------------ #
 
@@ -34,6 +37,7 @@ class Tasks(commands.Cog, name="Tasks"):
             await self.bot.change_presence(activity=discord.Game(name="with " + str(len(believers)) + " believers | " + os.getenv('prefix') + "gods help"))
         except Exception as e:
             logger.logDebug("Error updating presence: " + str(e))
+        self.firstrundone = True
 
     # ------------ GOD TASKS ------------ #
 
@@ -50,6 +54,9 @@ class Tasks(commands.Cog, name="Tasks"):
 
     @tasks.loop(hours=1.5)
     async def doFalloffs(self):
+        if not self.firstrundone:
+            return
+
         await logger.log("Running Falloff's Task...", self.bot, "DEBUG")
         globalMoodFalloff = random.uniform(0.01, 3.0)
         globalPowerFalloff = random.uniform(0.01, 0.75)
