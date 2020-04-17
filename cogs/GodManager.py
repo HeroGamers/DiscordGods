@@ -25,6 +25,14 @@ class GodManager(commands.Cog, name="Religion Management"):
             await ctx.send("A God with that name already exists!")
             return
 
+        if len(args[0]) > 16:
+            await ctx.send("Please choose a name that's not longer than 16 characters!")
+            return
+
+        if len(args[1]) > 19:
+            await ctx.send("Please choose a gender that's not longer than 19 characters!")
+            return
+
         if len(args) > 1:
             god = database.newGod(ctx.guild.id, args[0], random.choice(botutils.godtypes)[0], args[1])
         else:
@@ -53,7 +61,7 @@ class GodManager(commands.Cog, name="Religion Management"):
 
     @commands.command(name="access", aliases=["lock", "open"])
     async def _access(self, ctx):
-        """Set your religion as open or invite only"""
+        """Set your religion as open or invite only - Priest only"""
         god = await self.isBelieverAndPriest(ctx)
 
         if god:
@@ -74,7 +82,7 @@ class GodManager(commands.Cog, name="Religion Management"):
 
     @commands.command(name="description", aliases=["desc"])
     async def _description(self, ctx, *args):
-        """Sets a description for your religion"""
+        """Sets a description for your religion - Priest only"""
         god = await self.isBelieverAndPriest(ctx)
 
         if god:
@@ -92,7 +100,7 @@ class GodManager(commands.Cog, name="Religion Management"):
 
     @commands.command(name="invite", aliases=["inv"])
     async def _invite(self, ctx, arg1):
-        """Invite someone to your religion"""
+        """Invite someone to your religion - Priest only"""
         god = await self.isBelieverAndPriest(ctx)
         if god:
             user = await botutils.getUser(self.bot, ctx.guild, arg1)
@@ -125,6 +133,41 @@ class GodManager(commands.Cog, name="Religion Management"):
                                "*Invites will become invalid 24 hours after being issued.*")
             else:
                 await ctx.send("Creating the invite failed!")
+
+    @commands.command(name="settype", aliases=["typeset", "type"])
+    async def _settype(self, ctx, arg1):
+        """Set the type of your God to something else! - Priest only"""
+        god = await self.isBelieverAndPriest(ctx)
+        if god:
+            godTypes = []
+            for godTypeSet in botutils.godtypes:
+                godTypes.append(godTypeSet[0])
+
+            if arg1.upper() in godTypes:
+                database.setType(god.ID, arg1.upper())
+                await ctx.send("Set your God's type successfully!")
+            else:
+                types_string = ""
+                i = 1
+                for type in godTypes:
+                    if i == 1:
+                        types_string = type
+                    else:
+                        types_string = types_string + ", " + type
+                    i += 1
+                await ctx.send("Please choose between these types: `" + types_string + "`!")
+
+    @commands.command(name="setgender", aliases=["genderset", "gender"])
+    async def _setgender(self, ctx, arg1):
+        """Set the gender of your God to something else! - Priest only"""
+        god = await self.isBelieverAndPriest(ctx)
+        if god:
+            if len(arg1) > 19:
+                await ctx.send("Please choose a gender that's not longer than 19 characters!")
+                return
+
+            database.setGender(god.ID, arg1)
+            await ctx.send("Gender successfully set to: " + arg1 + "!")
 
 
 def setup(bot):

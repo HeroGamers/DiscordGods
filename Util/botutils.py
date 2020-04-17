@@ -50,7 +50,7 @@ class botutils():
         if god.Gender:
             neutral_genders = ["Non-binary", "Nb", "Neutral", "Nonbinary", "Sexless", "None"]
 
-            if god.Gender == "Female":
+            if god.Gender.upper() == "Female".upper():
                 god_title = "Goddess"
             elif god.Gender.upper() in (gender.upper() for gender in neutral_genders):
                 god_title = "Diety"

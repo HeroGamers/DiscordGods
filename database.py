@@ -8,8 +8,8 @@ db = SqliteDatabase('./Gods.db')
 snowflake_max_length = 20  # It is currently 18, but max size of uint64 is 20 chars
 discordtag_max_length = 37  # Max length of usernames are 32 characters, added # and the discrim gives 37
 guildname_max_length = 100  # For some weird reason guild names can be up to 100 chars... whatevs lol
-godname_max_length = 16 # Let's just keep godnames at 16 lul
-description_max_length = 100 # why not lol
+godname_max_length = 16  # Let's just keep godnames at 16 lul
+description_max_length = 100  # why not lol
 
 
 # --------------------------------------------------- GODS ---------------------------------------------------- #
@@ -108,6 +108,18 @@ def setPriest(godid, believerid):
 # Set a description for a God
 def setDesc(godid, desc):
     query = gods.update(Description=desc).where(gods.ID.contains(godid))
+    query.execute()
+
+
+# Set a type for a God
+def setType(godid, type):
+    query = gods.update(Type=type).where(gods.ID.contains(godid))
+    query.execute()
+
+
+# Set a gender for a God
+def setGender(godid, gender):
+    query = gods.update(Gender=gender).where(gods.ID.contains(godid))
     query.execute()
 
 
