@@ -22,7 +22,7 @@ class BotManager(commands.Cog, name="Bot Commands"):
         """How to invite the bot"""
         await ctx.send(
             "Invite me to your server with this link: "
-            "<https://discordapp.com/oauth2/authorize?scope=bot&client_id=699403302198313011>")
+            "<https://discordapp.com/oauth2/authorize?scope=bot&client_id=180405652605239296>")
 
     @commands.command(name="botinfo", aliases=["bot"])
     async def _botinfo(self, ctx):
