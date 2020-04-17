@@ -192,9 +192,9 @@ def getBelieverByID(believerID):
     return False
 
 
-# Get top 50 believers, globally
+# Get all believers, globally
 def getBelieversGlobal():
-    query = believers.select().sort(believers.PrayerPower).limit(50)
+    query = believers.select().sort(believers.PrayerPower)
     if query.exists():
         return query
     return False

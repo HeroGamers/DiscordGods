@@ -31,6 +31,8 @@ class Info(commands.Cog, name="Information"):
         if god.Type:
             if god.Type.upper() == "YAOI":
                 embedcolor = discord.Color.from_rgb(204, 235, 245)
+            if god.Type.upper() == "TRAPS":
+                embedcolor = discord.Color.from_rgb(248, 184, 248)
             for type, color in botutils.godtypes:
                 if type == god.Type:
                     embedcolor = color
@@ -111,7 +113,7 @@ class Info(commands.Cog, name="Information"):
         godlist = ""
 
         for god in gods:
-            if i > 15:
+            if i > 10:
                 break
 
             believers = database.getBelieversByID(god.ID)
@@ -187,7 +189,7 @@ class Info(commands.Cog, name="Information"):
         marriagelist = ""
 
         for marriage in marriages:
-            if i > 15:
+            if i > 10:
                 break
 
             believer1 = await botutils.getUser(self.bot, ctx.guild, database.getBelieverByID(marriage.Believer1).UserID)
