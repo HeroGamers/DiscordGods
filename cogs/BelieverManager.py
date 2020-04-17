@@ -165,6 +165,8 @@ class BelieverManager(commands.Cog, name="Believer"):
             await ctx.send("Aww... Your special someone is already married...")
         elif believer1.God != believer2.God:
             await ctx.send("You are not believing in the same God as your special someone!")
+        elif believer1 == believer2:
+            await ctx.send("You can't marry yourself, bozo!")
         else:
             god = believer1.God
             embedcolor = discord.Color.dark_gold()
