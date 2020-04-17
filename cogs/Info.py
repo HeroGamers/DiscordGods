@@ -29,6 +29,8 @@ class Info(commands.Cog, name="Information"):
 
         embedcolor = discord.Color.green()
         if god.Type:
+            if god.Type.upper() == "YAOI":
+                embedcolor = discord.Color.from_rgb(204, 235, 245)
             for type, color in botutils.godtypes:
                 if type == god.Type:
                     embedcolor = color
@@ -171,7 +173,7 @@ class Info(commands.Cog, name="Information"):
                        "```pl\n" + marriagelist + "```")
 
     @commands.command(name="globalmarriages", aliases=["gmarriages", "globalmarrylist"])
-    async def _marriages(self, ctx):
+    async def _globalmarriages(self, ctx):
         """Lists the most loving married couples globally"""
         marriages = database.getMarriagesGlobal()
         if not marriages:
