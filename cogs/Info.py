@@ -84,7 +84,7 @@ class Info(commands.Cog, name="Information"):
                 believers = len(database.getBelieversByID(god.ID))
             godtext = str("[" + str(i) + "]  > #" + god.Name + "\n"
                           "         " + botutils.getGodString(god) + " of " + god.Type.capitalize() + "\n"
-                          "         Power: " + god.Power + "\n"
+                          "         Power: " + str(round(god.Power, 2)) + "\n"
                           "         Believers: " + str(believers) + "\n")
             godlist = godlist+godtext
 
