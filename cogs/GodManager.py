@@ -4,6 +4,7 @@ from discord.ext import commands
 import database
 from Util import logger
 from Util.botutils import botutils
+from Util import botutils
 
 
 class GodManager(commands.Cog, name="Religion Management"):
@@ -13,6 +14,7 @@ class GodManager(commands.Cog, name="Religion Management"):
     # ------------ GOD MANAGEMENT ------------ #
 
     @commands.command(name="create", aliases=["newgod"])
+    @commands.check(botutils.isNotBeliever)
     async def _create(self, ctx, *args):
         """Creates a new God"""
         user = ctx.author
@@ -49,24 +51,11 @@ class GodManager(commands.Cog, name="Religion Management"):
         else:
             await ctx.send("Boohoo, God creation failed...")
 
-    @classmethod
-    async def isBelieverAndPriest(cls, ctx):
-        believer = database.getBeliever(ctx.author.id, ctx.guild.id)
-        if not believer:
-            await ctx.send("You are not believing in a God!")
-            return False
-
-        god = database.getGod(believer.God)
-        if not god.Priest or god.Priest != believer.ID:
-            await ctx.send("You are not a priest!")
-            return False
-
-        return god
-
     @commands.command(name="access", aliases=["lock", "open"])
+    @commands.check(botutils.isPriest)
     async def _access(self, ctx):
         """Set your religion as open or invite only - Priest only"""
-        god = await self.isBelieverAndPriest(ctx)
+        god = database.getBeliever(ctx.user.id, ctx.guild.id).God
 
         if god:
             if database.toggleAccess(god.ID):
@@ -75,19 +64,22 @@ class GodManager(commands.Cog, name="Religion Management"):
                 await ctx.send("God is now Open!")
 
     @commands.command(name="ally", aliases=["friend"])
+    @commands.check(botutils.isPriest)
     async def _ally(self, ctx):
         """Toggles alliance with another religion - Not done"""
         logger.logDebug("yes")
 
     @commands.command(name="war", aliases=["enemy"])
+    @commands.check(botutils.isPriest)
     async def _war(self, ctx):
         """Toggles war with another religion - Not done"""
         logger.logDebug("yes")
 
     @commands.command(name="description", aliases=["desc"])
+    @commands.check(botutils.isPriest)
     async def _description(self, ctx, *args):
-        """Sets a description for your religion - Priest only"""
-        god = await self.isBelieverAndPriest(ctx)
+        """Sets a description for your religion"""
+        god = database.getBeliever(ctx.user.id, ctx.guild.id).God
 
         if god:
             desc = ""
@@ -103,9 +95,10 @@ class GodManager(commands.Cog, name="Religion Management"):
             await ctx.send("Description set successfully!")
 
     @commands.command(name="invite", aliases=["inv"])
+    @commands.check(botutils.isPriest)
     async def _invite(self, ctx, arg1):
-        """Invite someone to your religion - Priest only"""
-        god = await self.isBelieverAndPriest(ctx)
+        """Invite someone to your religion"""
+        god = database.getBeliever(ctx.user.id, ctx.guild.id).God
         if god:
             user = await botutils.getUser(self.bot, ctx.guild, arg1)
 
@@ -139,9 +132,10 @@ class GodManager(commands.Cog, name="Religion Management"):
                 await ctx.send("Creating the invite failed!")
 
     @commands.command(name="settype", aliases=["typeset", "type"])
+    @commands.check(botutils.isPriest)
     async def _settype(self, ctx, arg1):
-        """Set the type of your God to something else! - Priest only"""
-        god = await self.isBelieverAndPriest(ctx)
+        """Set the type of your God to something else!"""
+        god = database.getBeliever(ctx.user.id, ctx.guild.id).God
         if god:
             godTypes = []
             for godTypeSet in botutils.godtypes:
@@ -162,9 +156,10 @@ class GodManager(commands.Cog, name="Religion Management"):
                 await ctx.send("Please choose between these types: `" + types_string + "`!")
 
     @commands.command(name="setgender", aliases=["genderset", "gender"])
+    @commands.check(botutils.isPriest)
     async def _setgender(self, ctx, arg1):
-        """Set the gender of your God to something else! - Priest only"""
-        god = await self.isBelieverAndPriest(ctx)
+        """Set the gender of your God to something else!"""
+        god = database.getBeliever(ctx.user.id, ctx.guild.id).God
         if god:
             if len(arg1) > 19:
                 await ctx.send("Please choose a gender that's not longer than 19 characters!")

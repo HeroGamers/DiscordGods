@@ -6,6 +6,55 @@ import database
 from Util import logger
 
 
+# ------------ COMMAND CHECKS ------------ #
+
+def isBeliever(ctx):
+    believer = database.getBeliever(ctx.author.id, ctx.guild.id)
+    if believer:
+        return True
+    return False
+
+
+def isPriest(ctx):
+    believer = database.getBeliever(ctx.author.id, ctx.guild.id)
+    if believer:
+        god = database.getGod(believer.God)
+        if not god.Priest or god.Priest != believer.ID:
+            return False
+        else:
+            return True
+    return False
+
+
+def isNotBeliever(ctx):
+    believer = database.getBeliever(ctx.author.id, ctx.guild.id)
+    if believer:
+        return False
+    return True
+
+
+def isMarried(ctx):
+    believer = database.getBeliever(ctx.author.id, ctx.guild.id)
+    married = database.getMarriage(believer.ID)
+
+    if married:
+        return True
+    return False
+
+
+def hasOffer(ctx):
+    believer = database.getBeliever(ctx.author.id, ctx.guild.id)
+    if believer:
+        priestoffer = database.getPriestOffer(believer.ID)
+        if not priestoffer:
+            return False
+        if not priestoffer.UserID == str(ctx.author.id):
+            return False
+        return True
+    return False
+
+
+
 class botutils():
     godtypes = [("FROST", discord.Color.blue()),
                 ("LOVE", discord.Color.red()),

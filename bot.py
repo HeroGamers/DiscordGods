@@ -28,7 +28,8 @@ startup_extensions = ["BotManager",
                       "GodManager",
                       "BelieverManager",
                       "Info",
-                      "Tasks"]
+                      "Tasks",
+                      "Misc"]
 
 
 @bot.event
