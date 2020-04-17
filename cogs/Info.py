@@ -48,12 +48,13 @@ class Info(commands.Cog, name="Information"):
         if not believers:
             believers = []
         embed.add_field(name="Believers", value="%s" % len(believers), inline=True)
-        embed.add_field(name="Power", value=god.Power, inline=True)
+        embed.add_field(name="Power", value=round(god.Power, 1), inline=True)
         if god.Gender:
-            embed.add_field(name="Gender:",value=god.Gender, inline=True)
+            embed.add_field(name="Gender:", value=god.Gender, inline=True)
+        embed.add_field(name="Mood:", value=botutils.getGodMood(god.Mood), inline=True)
         embed.add_field(name="Invite Only:", value=god.InviteOnly, inline=True)
         if god.Priest:
-            priest = self.bot.get_user(int(god.Priest.UserID))
+            priest = self.bot.get_user(int(database.getBelieverByID(god.Priest).UserID))
             embed.set_footer(text="Priest: %s" % priest.name+"#"+priest.discriminator,
                              icon_url=priest.avatar_url)
         else:

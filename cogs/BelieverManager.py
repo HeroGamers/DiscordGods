@@ -55,6 +55,8 @@ class BelieverManager(commands.Cog, name="Believer"):
             # If there aren't any believers in the God anymore, disband it
             if not database.getBelieversByID(believer.God):
                 database.disbandGod(believer.God)
+            elif believer.God.Priest == believer.ID:
+                database.setPriest(believer.God.ID, None)
 
             # If the user was married, divorce them
             marriage = database.getMarriage(believer.ID)
@@ -66,7 +68,11 @@ class BelieverManager(commands.Cog, name="Believer"):
     @commands.command(name="join", aliases=["enter"])
     async def _join(self, ctx, arg1):
         """Joins a religion"""
-        if database.getBeliever(ctx.author.id, ctx.guild.id):
+        believer = database.getBeliever(ctx.author.id, ctx.guild.id)
+        if believer:
+            if arg1.upper() == believer.God.Name.upper():
+                await ctx.send("You are already believing in this God!")
+                return
             await ctx.send("You are already in a God, please leave it to join a new one using `/gods leave`!")
             return
 
@@ -86,6 +92,16 @@ class BelieverManager(commands.Cog, name="Believer"):
         database.newBeliever(ctx.author.id, god.ID)
         await ctx.send("You've now become a believer in the name of " + god.Name + "!")
 
+        priestoffer = database.getPriestOffer(god.ID)
+
+        print(priestoffer)
+
+        if not god.Priest and not database.getPriestOffer(god.ID):
+            await botutils.doNewPriestOffer(self.bot, god)
+            logger.logDebug("Sent a new priest offer, God reached 3 believers!")
+        else:
+            logger.logDebug("God already had a preist or a priest offer")
+
     @commands.command(name="no", aliases=["deny", "decline", "reject"])
     async def _no(self, ctx):
         """Reject a proposal from your God"""
@@ -93,14 +109,18 @@ class BelieverManager(commands.Cog, name="Believer"):
         if not believer:
             return
 
-        priestoffer = database.getPriestOffer(believer.UserID, ctx.guild.id)
+        priestoffer = database.getPriestOffer(believer.God.ID)
 
         if not priestoffer:
+            await ctx.send("You have no new offer from your God!")
+            return
+        if not priestoffer.UserID == str(ctx.author.id):
             await ctx.send("You have no new offer from your God!")
             return
 
         database.deletePriestOffer(priestoffer.ID)
         await ctx.send("You have rejected " + believer.God.Name + "'s request!")
+        await botutils.doNewPriestOffer(self.bot, priestoffer.God, priestoffer)
 
     @commands.command(name="yes", aliases=["accept"])
     async def _yes(self, ctx):
@@ -109,9 +129,13 @@ class BelieverManager(commands.Cog, name="Believer"):
         if not believer:
             return
 
-        priestoffer = database.getPriestOffer(believer.UserID, ctx.guild.id)
+        priestoffer = database.getPriestOffer(believer.God.ID)
 
         if not priestoffer:
+            await ctx.send("You have no new offer from your God!")
+            logger.logDebug("No priest offers for god...")
+            return
+        if not priestoffer.UserID == str(ctx.author.id):
             await ctx.send("You have no new offer from your God!")
             return
 
@@ -132,12 +156,10 @@ class BelieverManager(commands.Cog, name="Believer"):
         minutes = timediff.total_seconds()/60
 
         if minutes >= 30:
-            print(0)
             database.pray(believer.ID)
             believer = database.getBelieverByID(believer.ID)
-            print(1)
 
-            await ctx.send("You prayed to your God! Your prayer power is now **" + believer.PrayerPower + "**!")
+            await ctx.send("You prayed to your God! Your prayer power is now **" + str(round(believer.PrayerPower, 2)) + "**!")
         else:
             timeTillPray = 30-minutes
             await ctx.send("You cannot pray to your " + botutils.getGodString(believer.God) + " yet! Time remaining: "

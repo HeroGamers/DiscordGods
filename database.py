@@ -1,5 +1,5 @@
 from peewee import SqliteDatabase, Model, CharField, DateTimeField, AutoField, ForeignKeyField, SmallIntegerField, \
-    BooleanField, IntegerField, BitField
+    BooleanField, IntegerField, BitField, FloatField
 import datetime
 from Util import logger
 
@@ -22,8 +22,8 @@ class gods(Model):
     Name = CharField(max_length=godname_max_length)
     Gender = CharField(null=True, max_length=19)
     Type = CharField(max_length=10)
-    Mood = SmallIntegerField(null=True, default=0)
-    Power = CharField(max_length=5, default="1")
+    Mood = FloatField(null=True, default=0.0)
+    Power = FloatField(default=1.0)
     Priest = IntegerField(null=True)
     InviteOnly = BooleanField(default=False)
     Description = CharField(null=True, max_length=description_max_length)
@@ -111,6 +111,12 @@ def setDesc(godid, desc):
     query.execute()
 
 
+# Set a mood for a God
+def setMood(godid, mood):
+    query = gods.update(Mood=mood).where(gods.ID.contains(godid))
+    query.execute()
+
+
 # Toggle access (inviteonly)
 def toggleAccess(godid):
     god = getGod(godid)
@@ -124,6 +130,15 @@ def toggleAccess(godid):
     return access
 
 
+# Subtract mood and power on all Gods
+def doGodsFalloff(falloffMood, falloffPower):
+    query = gods.update(Power=(gods.Power - falloffPower)).where(gods.Power > (0.0 + falloffPower))
+    query.execute()
+
+    query = gods.update(Mood=(gods.Mood - falloffMood)).where(gods.Mood > (-100.0 + falloffMood))
+    query.execute()
+
+
 # --------------------------------------------------- BELIEVERS ---------------------------------------------------- #
 
 
@@ -132,7 +147,7 @@ class believers(Model):
     ID = AutoField()
     God = ForeignKeyField(gods)
     UserID = CharField(max_length=snowflake_max_length)
-    PrayerPower = CharField(max_length=5, default="1")
+    PrayerPower = FloatField(default=1)
     Prayers = CharField(max_length=5, default="0")
     PrayDate = DateTimeField(default=datetime.datetime.now())
     JoinDate = DateTimeField(default=datetime.datetime.now())
@@ -182,10 +197,20 @@ def pray(believerid):
     god = getGod(believer.God)
     date = datetime.datetime.now()
 
-    query = believers.update(PrayDate=date, PrayerPower=str(int(believer.PrayerPower)+1), Prayers=str(int(believer.Prayers)+1)).where(believers.ID.contains(believer.ID))
+    query = believers.update(PrayDate=date, PrayerPower=(believer.PrayerPower+1), Prayers=str(int(believer.Prayers)+1)).where(believers.ID.contains(believer.ID))
     query.execute()
 
-    query = gods.update(Power=str(int(god.Power)+1)).where(gods.ID.contains(god.ID))
+    query = gods.update(Power=(god.Power+1)).where(gods.ID.contains(god.ID))
+    query.execute()
+
+    moodRaise = 10
+    query = gods.update(Mood=(god.Mood+moodRaise)).where(gods.Mood < (100 - moodRaise))
+    query.execute()
+
+
+# Subtract prayerpower on all believers
+def doBelieverFalloffs(falloffPrayerPower):
+    query = believers.update(PrayerPower=(believers.PrayerPower - falloffPrayerPower)).where(believers.PrayerPower > (0 + falloffPrayerPower))
     query.execute()
 
 
@@ -308,8 +333,8 @@ def newPriestOffer(godid, userid):
 
 
 # Get someone's priest offer for a god
-def getPriestOffer(userid, godid):
-    query = offers.select().where(offers.Type == 2 & offers.UserID.contains(userid) & offers.God.contains(godid))
+def getPriestOffer(godid):
+    query = offers.select().where((offers.Type == 2) & (offers.God.contains(godid)))
     if query.exists():
         return query[0]
     return False
@@ -317,7 +342,7 @@ def getPriestOffer(userid, godid):
 
 # Delete a priest offer // used after a priest offer has been used
 def deletePriestOffer(offerid):
-    priestoffer = offers.select().where(offers.Type == 2 & offers.ID.contains(offerid))
+    priestoffer = offers.select().where((offers.Type == 2) & (offers.ID.contains(offerid)))
     if priestoffer.exists():
         query = priestoffer[0].delete_instance()
         if query == 1:
@@ -327,9 +352,9 @@ def deletePriestOffer(offerid):
 
 # Get and clear old priest offers
 def clearOldPriestOffers(date):
-    priestOffers = offers.select().where(offers.Type == 2 & offers.CreationDate < date)
+    priestOffers = offers.select().where((offers.Type == 2) & (offers.CreationDate < date))
     if priestOffers.exists():
-        query = offers.delete().where(offers.Type == 2 & offers.CreationDate < date)
+        query = offers.delete().where((offers.Type == 2) & (offers.CreationDate < date))
         query.execute()
         return priestOffers
     return False
