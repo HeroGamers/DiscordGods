@@ -216,19 +216,17 @@ def setGod(believerid, godid):
 
 
 # Prays
-def pray(believerid):
-    believer = getBelieverByID(believerid)
-    god = getGod(believer.God)
-    date = datetime.datetime.now()
-
-    query = believers.update(PrayDate=date, PrayerPower=(believer.PrayerPower+1), Prayers=str(int(believer.Prayers)+1)).where(believers.ID.contains(believer.ID))
+def pray(believerInput):
+    query = believers.update(PrayDate=datetime.datetime.now(), PrayerPower=(believerInput.PrayerPower+1),
+                             Prayers=str(int(believerInput.Prayers)+1)).where(believers.ID.contains(believerInput.ID))
     query.execute()
 
-    query = gods.update(Power=(god.Power+1)).where(gods.ID.contains(god.ID))
+    query = gods.update(Power=(believerInput.God.Power+1)).where(gods.ID.contains(believerInput.God.ID))
     query.execute()
 
     moodRaise = 10
-    query = gods.update(Mood=(god.Mood+moodRaise)).where(gods.Mood < (100 - moodRaise))
+    query = gods.update(Mood=(believerInput.God.Mood+moodRaise)).where((gods.ID.contains(believerInput.God.ID)) &
+                                                                       (gods.Mood < (100 - moodRaise)))
     query.execute()
 
 

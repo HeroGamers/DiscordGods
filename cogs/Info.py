@@ -94,7 +94,49 @@ class Info(commands.Cog, name="Information"):
         await ctx.send("**The Gods of " + ctx.guild.name + "**\n\n"
                        "```pl\n" + godlist + "```")
 
-    @commands.command(name="marriages", aliases=["not_singles_like_you"])
+    @commands.command(name="globallist", aliases=["globalgods", "glist", "ggods"])
+    async def _globallist(self, ctx):
+        """Lists the top Gods globally"""
+        gods = database.getGodsGlobal()
+        if not gods:
+            await ctx.send("There are no Gods, yet... `/gods create <name>`")
+            return
+
+        gods = list(gods)
+        gods.reverse()
+
+        i = 1
+        godlist = ""
+
+        for god in gods:
+            if i > 15:
+                break
+
+            believers = database.getBelieversByID(god.ID)
+            if not believers:
+                believers = 0
+            else:
+                believers = len(database.getBelieversByID(god.ID))
+
+            guild_name = "NaN"
+
+            guild = self.bot.get_guild(int(god.Guild))
+            if guild:
+                guild_name = guild.name
+
+            godtext = str("[" + str(i) + "]  > #" + god.Name + "\n"
+                          "         " + botutils.getGodString(god) + " of " + god.Type.capitalize() + "\n"
+                          "         Power: " + str(round(god.Power, 2)) + "\n"
+                          "         Believers: " + str(believers) + "\n"
+                          "         Server: " + guild_name + "\n")
+            godlist = godlist + godtext
+
+            i += 1
+
+        await ctx.send("**The Global Gods Leaderboard**\n\n"
+                       "```pl\n" + godlist + "```")
+
+    @commands.command(name="marriages", aliases=["not_singles_like_you", "marrylist"])
     async def _marriages(self, ctx):
         """Lists the most loving married couples on the server"""
         marriages = database.getMarriages(ctx.guild.id)
@@ -126,6 +168,46 @@ class Info(commands.Cog, name="Information"):
             i += 1
 
         await ctx.send("**The Married Couples of " + ctx.guild.name + "**\n\n"
+                       "```pl\n" + marriagelist + "```")
+
+    @commands.command(name="globalmarriages", aliases=["gmarriages", "globalmarrylist"])
+    async def _marriages(self, ctx):
+        """Lists the most loving married couples globally"""
+        marriages = database.getMarriagesGlobal()
+        if not marriages:
+            await ctx.send("There are no Marriages, yet... `/gods marry <someone special>`")
+            return
+
+        marriages = list(marriages)
+        marriages.reverse()
+
+        i = 1
+        marriagelist = ""
+
+        for marriage in marriages:
+            if i > 15:
+                break
+
+            believer1 = await botutils.getUser(self.bot, ctx.guild, database.getBelieverByID(marriage.Believer1).UserID)
+
+            believer2 = await botutils.getUser(self.bot, ctx.guild, database.getBelieverByID(marriage.Believer2).UserID)
+
+            god = database.getGod(marriage.God)
+            guild_name = "NaN"
+
+            guild = self.bot.get_guild(int(god.Guild))
+            if guild:
+                guild_name = guild.name
+
+            marrytext = str("[" + str(i) + "]  > #" + believer1.name + " & " + believer2.name + "\n"
+                            "         Loved: " + marriage.LoveDate.strftime("%Y-%m-%d %H:%M:%S") + "\n"
+                            "         " + botutils.getGodString(god) + ": " + god.Name + "\n"
+                            "         Server: " + guild_name + "\n")
+            marriagelist = marriagelist + marrytext
+
+            i += 1
+
+        await ctx.send("**The Global Married Couples Leaderboard**\n\n"
                        "```pl\n" + marriagelist + "```")
 
 

@@ -54,7 +54,7 @@ class GodManager(commands.Cog, name="Religion Management"):
     @commands.check(utilchecks.isPriest)
     async def _access(self, ctx):
         """Set your religion as open or invite only - Priest only"""
-        god = database.getBeliever(ctx.user.id, ctx.guild.id).God
+        god = database.getBeliever(ctx.author.id, ctx.guild.id).God
 
         if god:
             if database.toggleAccess(god.ID):
@@ -78,7 +78,7 @@ class GodManager(commands.Cog, name="Religion Management"):
     @commands.check(utilchecks.isPriest)
     async def _description(self, ctx, *args):
         """Sets a description for your religion"""
-        god = database.getBeliever(ctx.user.id, ctx.guild.id).God
+        god = database.getBeliever(ctx.author.id, ctx.guild.id).God
 
         if god:
             desc = ""
@@ -97,7 +97,7 @@ class GodManager(commands.Cog, name="Religion Management"):
     @commands.check(utilchecks.isPriest)
     async def _invite(self, ctx, arg1):
         """Invite someone to your religion"""
-        god = database.getBeliever(ctx.user.id, ctx.guild.id).God
+        god = database.getBeliever(ctx.author.id, ctx.guild.id).God
         if god:
             user = await botutils.getUser(self.bot, ctx.guild, arg1)
 
@@ -134,7 +134,7 @@ class GodManager(commands.Cog, name="Religion Management"):
     @commands.check(utilchecks.isPriest)
     async def _settype(self, ctx, arg1):
         """Set the type of your God to something else!"""
-        god = database.getBeliever(ctx.user.id, ctx.guild.id).God
+        god = database.getBeliever(ctx.author.id, ctx.guild.id).God
         if god:
             godTypes = []
             for godTypeSet in botutils.godtypes:
@@ -158,7 +158,7 @@ class GodManager(commands.Cog, name="Religion Management"):
     @commands.check(utilchecks.isPriest)
     async def _setgender(self, ctx, arg1):
         """Set the gender of your God to something else!"""
-        god = database.getBeliever(ctx.user.id, ctx.guild.id).God
+        god = database.getBeliever(ctx.author.id, ctx.guild.id).God
         if god:
             if len(arg1) > 19:
                 await ctx.send("Please choose a gender that's not longer than 19 characters!")

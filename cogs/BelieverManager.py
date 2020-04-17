@@ -132,7 +132,7 @@ class BelieverManager(commands.Cog, name="Believer"):
         minutes = timediff.total_seconds()/60
 
         if minutes >= 30:
-            database.pray(believer.ID)
+            database.pray(believer)
             believer = database.getBelieverByID(believer.ID)
 
             await ctx.send("You prayed to your God! Your prayer power is now **" + str(round(believer.PrayerPower, 2)) + "**!")

@@ -35,10 +35,11 @@ def isNotBeliever(ctx):
 
 def isMarried(ctx):
     believer = database.getBeliever(ctx.author.id, ctx.guild.id)
-    married = database.getMarriage(believer.ID)
+    if believer:
+        married = database.getMarriage(believer.ID)
 
-    if married:
-        return True
+        if married:
+            return True
     return False
 
 
@@ -60,7 +61,7 @@ class botutils():
                 ("EVIL", discord.Color.darker_grey()),
                 ("SEA", discord.Color.dark_blue()),
                 ("MOON", discord.Color.light_grey()),
-                ("SUN", discord.Color.dark_orange()),
+                ("SUN", discord.Color.gold()),
                 ("THUNDER", discord.Color.orange()),
                 ("PARTY", discord.Color.magenta()),
                 ("WAR", discord.Color.dark_red()),
