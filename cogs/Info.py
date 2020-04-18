@@ -10,18 +10,18 @@ class Info(commands.Cog, name="Information"):
 
     # ------------ INFORMATION ------------ #
 
-    @commands.command(name="info", aliases=["godinfo"])
+    @commands.command(name="info", aliases=["godinfo", "i"])
     async def _info(self, ctx, *args):
         """Gets information about a God"""
-        god = None
         if len(args) > 0:
             god = database.getGodName(args[0], ctx.guild.id)
         else:
-
             believer = database.getBeliever(ctx.author.id, ctx.guild.id)
             if believer:
-
                 god = database.getGod(believer.God)
+            else:
+                await ctx.send("Please give a God name!")
+                return
 
         if not god:
             await ctx.send("That God doesn't exist!")

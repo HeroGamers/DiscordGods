@@ -45,15 +45,15 @@ def newGod(guild, name, type, gender=None):
 
 # Get a God's believers, using name and guild
 def getBelievers(godname, guild):
-    query = believers.select().join(gods).where(gods.Guild.contains(str(guild)) & gods.Name.contains(str(godname)))
+    query = believers.select().join(gods).where((gods.Guild == str(guild)) & (gods.Name.contains(str(godname))))
     if query.exists():
         return query
     return False
 
 
 # Get a God's believers, using ID
-def getBelieversByID(god):
-    query = believers.select().join(gods).where(gods.ID.contains(str(god)))
+def getBelieversByID(godid):
+    query = believers.select().join(gods).where(gods.ID == godid)
     if query.exists():
         return query
     return False
@@ -61,7 +61,7 @@ def getBelieversByID(god):
 
 # See if a god already exists with that name in a guild
 def getGodName(name, guild):
-    query = gods.select().where((gods.Guild.contains(str(guild)) & gods.Name.contains(str(name))))
+    query = gods.select().where((gods.Guild == str(guild)) & gods.Name.contains(str(name)))
     if query.exists():
         god = query.execute()
         return god[0]
@@ -70,7 +70,7 @@ def getGodName(name, guild):
 
 # Get a God by ID
 def getGod(godid):
-    query = gods.select().where(gods.ID.contains(str(godid)))
+    query = gods.select().where(gods.ID == godid)
     if query.exists():
         return query[0]
     return False
@@ -78,7 +78,7 @@ def getGod(godid):
 
 # Gets all Gods in a guild
 def getGods(guild):
-    query = gods.select().where(gods.Guild.contains(str(guild))).order_by(gods.Power)
+    query = gods.select().where(gods.Guild == str(guild)).order_by(gods.Power)
     return query
 
 
@@ -90,7 +90,7 @@ def getGodsGlobal():
 
 # Disband a God
 def disbandGod(godid):
-    god = gods.select().where(gods.ID.contains(str(godid)))
+    god = gods.select().where(gods.ID == godid)
     query = god[0].delete_instance()
     if query == 1:
         return True
@@ -99,31 +99,31 @@ def disbandGod(godid):
 
 # Set a priest for a God
 def setPriest(godid, believerid):
-    query = gods.update(Priest=believerid).where(gods.ID.contains(godid))
+    query = gods.update(Priest=believerid).where(gods.ID == godid)
     query.execute()
 
 
 # Set a description for a God
 def setDesc(godid, desc):
-    query = gods.update(Description=desc).where(gods.ID.contains(godid))
+    query = gods.update(Description=desc).where(gods.ID == godid)
     query.execute()
 
 
 # Set a type for a God
 def setType(godid, type):
-    query = gods.update(Type=type).where(gods.ID.contains(godid))
+    query = gods.update(Type=type).where(gods.ID == godid)
     query.execute()
 
 
 # Set a gender for a God
 def setGender(godid, gender):
-    query = gods.update(Gender=gender).where(gods.ID.contains(godid))
+    query = gods.update(Gender=gender).where(gods.ID == godid)
     query.execute()
 
 
 # Set a mood for a God
 def setMood(godid, mood):
-    query = gods.update(Mood=mood).where(gods.ID.contains(godid))
+    query = gods.update(Mood=mood).where(gods.ID == godid)
     query.execute()
 
 
@@ -135,7 +135,7 @@ def toggleAccess(godid):
     if god.InviteOnly:
         access = False
 
-    query = gods.update(InviteOnly=access).where(gods.ID.contains(godid))
+    query = gods.update(InviteOnly=access).where(gods.ID == godid)
     query.execute()
     return access
 
@@ -178,7 +178,7 @@ def newBeliever(userid, god):
 
 # Whether a believer already believes in a god on that guild, if yes, returns believer
 def getBeliever(userid, guild):
-    query = believers.select().join(gods).where(gods.Guild.contains(str(guild))).where(believers.UserID.contains(str(userid)))
+    query = believers.select().join(gods).where(gods.Guild == str(guild)).where(believers.UserID == str(userid))
     if query.exists():
         return query[0]
     return False
@@ -186,18 +186,23 @@ def getBeliever(userid, guild):
 
 # Whether a believer already believes in a god on that guild, if yes, returns believer
 def getBelieverByID(believerID):
-    query = believers.select().where(believers.ID.contains(believerID))
+    query = believers.select().where(believers.ID == believerID)
     if query.exists():
         return query[0]
     return False
 
 
-# Get all believers, globally
+# Get top 50 believers, globally
 def getBelieversGlobal():
-    query = believers.select().sort(believers.PrayerPower)
+    query = believers.select().sort(believers.PrayerPower).limit(50)
     if query.exists():
         return query
     return False
+
+
+# Get number of believers, globally
+def getBelieversGlobalCount():
+    return believers.select().count()
 
 
 # Leave a god
@@ -211,21 +216,21 @@ def leaveGod(userid, guild):
 
 # Believer set to another god
 def setGod(believerid, godid):
-    query = believers.update(God=godid).where(believers.ID.contains(believerid))
+    query = believers.update(God=godid).where(believers.ID == believerid)
     query.execute()
 
 
 # Prays
 def pray(believerInput):
     query = believers.update(PrayDate=datetime.datetime.now(), PrayerPower=(believerInput.PrayerPower+1),
-                             Prayers=str(int(believerInput.Prayers)+1)).where(believers.ID.contains(believerInput.ID))
+                             Prayers=str(int(believerInput.Prayers)+1)).where(believers.ID == believerInput.ID)
     query.execute()
 
-    query = gods.update(Power=(believerInput.God.Power+1)).where(gods.ID.contains(believerInput.God.ID))
+    query = gods.update(Power=(believerInput.God.Power+1)).where(gods.ID == believerInput.God.ID)
     query.execute()
 
     moodRaise = 10
-    query = gods.update(Mood=(believerInput.God.Mood+moodRaise)).where((gods.ID.contains(believerInput.God.ID)) &
+    query = gods.update(Mood=(believerInput.God.Mood+moodRaise)).where((gods.ID == believerInput.God.ID) &
                                                                        (gods.Mood < (100 - moodRaise)))
     query.execute()
 
@@ -264,7 +269,7 @@ def newMarriage(believer1, believer2, god):
 
 # Gets all Marriages in a guild
 def getMarriages(guild):
-    query = marriages.select().join(gods).where(gods.Guild.contains(str(guild))).order_by(marriages.LoveDate)
+    query = marriages.select().join(gods).where(gods.Guild == str(guild)).order_by(marriages.LoveDate)
     return query
 
 
@@ -276,7 +281,7 @@ def getMarriagesGlobal():
 
 # Get someone's marriage
 def getMarriage(believerid):
-    query = marriages.select().where(marriages.Believer1.contains(believerid) | marriages.Believer2.contains(believerid))
+    query = marriages.select().where(marriages.Believer1 == believerid | marriages.Believer2 == believerid)
     if query.exists():
         return query[0]
     return False
@@ -284,7 +289,7 @@ def getMarriage(believerid):
 
 # Delete a marriage
 def deleteMarriage(marriageid):
-    marriage = marriages.select().where(marriages.ID.contains(marriageid))
+    marriage = marriages.select().where(marriages.ID == marriageid)
     if marriage.exists():
         query = marriage[0].delete_instance()
         if query == 1:
@@ -296,7 +301,7 @@ def deleteMarriage(marriageid):
 def doLove(marriageid):
     date = datetime.datetime.now()
 
-    query = marriages.update(LoveDate=date).where(marriages.ID.contains(marriageid))
+    query = marriages.update(LoveDate=date).where(marriages.ID == marriageid)
     query.execute()
 
 
@@ -327,7 +332,7 @@ def newInvite(godid, userid):
 
 # Get someone's invite for a god
 def getInvite(userid, godid):
-    query = offers.select().where(offers.Type == 1 & offers.UserID.contains(userid) & offers.God.contains(godid))
+    query = offers.select().where(offers.Type == 1 & offers.UserID == userid & offers.God == godid)
     if query.exists():
         return query[0]
     return False
@@ -342,7 +347,7 @@ def clearExpiredInvites():
 
 # Delete an invite // used after an invite has been used
 def deleteInvite(offerid):
-    invite = offers.select().where(offers.Type == 1 & offers.ID.contains(offerid))
+    invite = offers.select().where(offers.Type == 1 & offers.ID == offerid)
     if invite.exists():
         query = invite[0].delete_instance()
         if query == 1:
@@ -362,7 +367,7 @@ def newPriestOffer(godid, userid):
 
 # Get someone's priest offer for a god
 def getPriestOffer(godid):
-    query = offers.select().where((offers.Type == 2) & (offers.God.contains(godid)))
+    query = offers.select().where((offers.Type == 2) & (offers.God == godid))
     if query.exists():
         return query[0]
     return False
@@ -370,7 +375,7 @@ def getPriestOffer(godid):
 
 # Delete a priest offer // used after a priest offer has been used
 def deletePriestOffer(offerid):
-    priestoffer = offers.select().where((offers.Type == 2) & (offers.ID.contains(offerid)))
+    priestoffer = offers.select().where((offers.Type == 2) & (offers.ID == offerid))
     if priestoffer.exists():
         query = priestoffer[0].delete_instance()
         if query == 1:

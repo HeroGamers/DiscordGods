@@ -31,10 +31,7 @@ class Tasks(commands.Cog, name="Tasks"):
     @tasks.loop(minutes=30.0)
     async def doPresenceUpdate(self):
         try:
-            believers = database.getBelieversGlobal()
-            if not believers:
-                believers = []
-            await self.bot.change_presence(activity=discord.Game(name="with " + str(len(believers)) + " believers | " + os.getenv('prefix') + "gods help"))
+            await self.bot.change_presence(activity=discord.Game(name="with " + str(database.getBelieversGlobalCount()) + " believers | " + os.getenv('prefix') + "gods help"))
         except Exception as e:
             logger.logDebug("Error updating presence: " + str(e))
         self.firstrundone = True
