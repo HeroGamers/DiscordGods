@@ -144,7 +144,7 @@ class BelieverManager(commands.Cog, name="Believer"):
     # ------------ BELIEVER RELATIONSHIPS ------------ #
 
     @commands.command(name="marry", aliases=["propose"])
-    @commands.check(utilchecks.isBeliever)
+    @commands.check(utilchecks.isNotMarried)
     async def _marry(self, ctx, arg1):
         """Marry that special someone"""
         guildid = ctx.guild.id

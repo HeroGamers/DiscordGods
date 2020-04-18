@@ -172,7 +172,7 @@ def newBeliever(userid, god):
         believer = believers.create(UserID=userid, God=god)
         return believer
     except Exception as e:
-        logger.logDebug("Error doing new marriage - " + str(e), "ERROR")
+        logger.logDebug("Error doing new believer - " + str(e), "ERROR")
         return False
 
 
@@ -281,7 +281,7 @@ def getMarriagesGlobal():
 
 # Get someone's marriage
 def getMarriage(believerid):
-    query = marriages.select().where(marriages.Believer1 == believerid | marriages.Believer2 == believerid)
+    query = marriages.select().where((marriages.Believer1 == believerid) | (marriages.Believer2 == believerid))
     if query.exists():
         return query[0]
     return False
@@ -332,7 +332,7 @@ def newInvite(godid, userid):
 
 # Get someone's invite for a god
 def getInvite(userid, godid):
-    query = offers.select().where(offers.Type == 1 & offers.UserID == userid & offers.God == godid)
+    query = offers.select().where(offers.Type == 1 & offers.UserID == str(userid) & offers.God == godid)
     if query.exists():
         return query[0]
     return False

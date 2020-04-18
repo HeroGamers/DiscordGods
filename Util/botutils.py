@@ -43,6 +43,16 @@ def isMarried(ctx):
     return False
 
 
+def isNotMarried(ctx):
+    believer = database.getBeliever(ctx.author.id, ctx.guild.id)
+    if believer:
+        married = database.getMarriage(believer.ID)
+
+        if married:
+            return False
+    return True
+
+
 def hasOffer(ctx):
     believer = database.getBeliever(ctx.author.id, ctx.guild.id)
     if believer:
