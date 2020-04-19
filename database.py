@@ -332,7 +332,7 @@ def newInvite(godid, userid):
 
 # Get someone's invite for a god
 def getInvite(userid, godid):
-    query = offers.select().where(offers.Type == 1 & offers.UserID == str(userid) & offers.God == godid)
+    query = offers.select().where((offers.Type == 1) & (offers.UserID == str(userid)) & (offers.God == godid))
     if query.exists():
         return query[0]
     return False
@@ -340,14 +340,14 @@ def getInvite(userid, godid):
 
 # Clears expired invites
 def clearExpiredInvites():
-    today = datetime.datetime.today()
-    query = offers.delete().where(offers.Type == 1 & offers.CreationDate < today)
+    today = datetime.datetime.today() - datetime.timedelta(days=1)
+    query = offers.delete().where((offers.Type == 1) & (offers.CreationDate < today))
     query.execute()
 
 
 # Delete an invite // used after an invite has been used
 def deleteInvite(offerid):
-    invite = offers.select().where(offers.Type == 1 & offers.ID == offerid)
+    invite = offers.select().where((offers.Type == 1) & (offers.ID == offerid))
     if invite.exists():
         query = invite[0].delete_instance()
         if query == 1:
@@ -384,9 +384,11 @@ def deletePriestOffer(offerid):
 
 
 # Get and clear old priest offers
-def clearOldPriestOffers(date):
+def clearOldPriestOffers():
+    date = datetime.datetime.today() - datetime.timedelta(days=1)
     priestOffers = offers.select().where((offers.Type == 2) & (offers.CreationDate < date))
     if priestOffers.exists():
+        priestOffers = priestOffers.execute()
         query = offers.delete().where((offers.Type == 2) & (offers.CreationDate < date))
         query.execute()
         return priestOffers

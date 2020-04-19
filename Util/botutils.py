@@ -56,7 +56,7 @@ def isNotMarried(ctx):
 def hasOffer(ctx):
     believer = database.getBeliever(ctx.author.id, ctx.guild.id)
     if believer:
-        priestoffer = database.getPriestOffer(believer.ID)
+        priestoffer = database.getPriestOffer(believer.God)
         if not priestoffer:
             return False
         if not priestoffer.UserID == str(ctx.author.id):
@@ -143,7 +143,7 @@ class botutils():
     async def doNewPriestOffer(cls, bot, god, old_priestoffer=None):
         believers = database.getBelieversByID(god.ID)
 
-        if len(believers) >= 3:
+        if len(believers) >= 2:
             logger.logDebug("More than 3 believers in god, choosing new priest candidate!")
             iterations = 0
             while True:
@@ -193,7 +193,7 @@ class botutils():
                         user_permissions = channel.permissions_for(member)
                         bot_permissions = channel.permissions_for(bot_member)
                         if user_permissions.send_messages & bot_permissions.send_messages:
-                            await channel.send("<@" + user.id + "> has been selected as the priest for **" +
+                            await channel.send("<@" + str(user.id) + "> has been selected as the priest for **" +
                                                god.Name + "**!\nWrite `/gods accept` to accept the "
                                                "request, or `/gods deny` to decline the request!")
                             break

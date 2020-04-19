@@ -42,7 +42,7 @@ class Tasks(commands.Cog, name="Tasks"):
     async def priestTask(self):
         await logger.log("Clearing expired Priest Offers...", self.bot, "DEBUG")
         date = datetime.datetime.today()
-        priestoffers = database.clearOldPriestOffers(date)
+        priestoffers = database.clearOldPriestOffers()
         await logger.log("Cleared expired Priest Offers!", self.bot, "DEBUG")
 
         # Select a new priest for each God, if the God still qualifies
