@@ -1,8 +1,6 @@
 import os
 import random
-
 import discord
-
 import database
 from Util import logger
 
@@ -66,7 +64,7 @@ def hasOffer(ctx):
     return False
 
 
-class botutils():
+class botutils:
     godtypes = [("FROST", discord.Color.blue()),
                 ("LOVE", discord.Color.red()),
                 ("EVIL", discord.Color.darker_grey()),

@@ -13,11 +13,12 @@ class Misc(commands.Cog, name="Miscellaneous"):
     kiss_lines = ["{user} loves {target}!", "{user} kisses {target}!", "{user} loves {target} so, so very much!"]
 
     def __init__(self, bot):
+        """Fun commands - Some of them are free, others cost Prayer Power."""
         self.bot = bot
 
     @commands.command(name="getcolor", aliases=["getColor", "getcolour", "getColour"], pass_context=True, no_pm=True)
     async def _getcolor(self, ctx, hexcode: str):
-        """Gets information about a color from its HEX code"""
+        """Gets information about a color from its HEX code."""
         hexcode = hexcode.strip('#')
         url = "https://api.color.pizza/v1/{}".format(hexcode)
         async with aiohttp.ClientSession() as session:
@@ -42,8 +43,8 @@ class Misc(commands.Cog, name="Miscellaneous"):
         god = believer.God
         embedcolor = discord.Color.dark_gold()
         if god.Type:
-            for type, color in botutils.godtypes:
-                if type == god.Type:
+            for godtype, color in botutils.godtypes:
+                if godtype == god.Type:
                     embedcolor = color
 
         # Create embed
@@ -52,10 +53,10 @@ class Misc(commands.Cog, name="Miscellaneous"):
         # Get action line
         if "hug" in action.lower():
             action_line = random.choice(cls.hug_lines).replace("{user}", user.name).replace("{target}", target.name)
-            #embed.set_image(url=random.choice(self.huggifs))
+            # embed.set_image(url=random.choice(self.huggifs))
         if "kiss" in action.lower():
             action_line = random.choice(cls.kiss_lines).replace("{user}", user.name).replace("{target}", target.name)
-            #embed.set_image(url=random.choice(self.kissgifs))
+            # embed.set_image(url=random.choice(self.kissgifs))
         else:
             action_line = "Error!"
 
@@ -65,7 +66,7 @@ class Misc(commands.Cog, name="Miscellaneous"):
     @commands.command(name="hug")
     @commands.check(utilchecks.isBeliever)
     async def _hug(self, ctx, arg1):
-        """Hugs someone, awhh - 0.5 Prayer Power"""
+        """Hugs someone, awhh - 0.5 Prayer Power."""
         believer = database.getBeliever(ctx.author.id, ctx.guild.id)
         if believer.PrayerPower < 0.5:
             await ctx.send("Your Prayer Power is below 0.5! Try praying again, and then try hugging!")
@@ -79,7 +80,7 @@ class Misc(commands.Cog, name="Miscellaneous"):
     @commands.command(name="love", aliases=["kiss"])
     @commands.check(utilchecks.isMarried)
     async def _love(self, ctx):
-        """Shows your special someone that you love them - Free"""
+        """Shows your special someone that you love them - Free."""
         believer = database.getBeliever(ctx.author.id, ctx.guild.id)
         marriage = database.getMarriage(believer.ID)
 
@@ -102,10 +103,8 @@ class Misc(commands.Cog, name="Miscellaneous"):
             await ctx.send("Awwhh, lover not found...")
             return
 
-        #await ctx.send("<@" + loverid + "> - " + ctx.author.name + " loves you!")
+        # await ctx.send("<@" + loverid + "> - " + ctx.author.name + " loves you!")
         await ctx.send(embed=self.getMiscEmbed(believer, ctx.author, target, "KISS"))
-
-
 
 
 def setup(bot):

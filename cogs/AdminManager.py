@@ -1,13 +1,11 @@
-import random
 from discord.ext import commands
 import database
-from Util import logger
 from Util.botutils import botutils
-from Util import botutils as utilchecks
 
 
 class AdminManager(commands.Cog, name="Administrator Management"):
     def __init__(self, bot):
+        """For Server Administrators to manage the Gods and how DiscordGods work on the server."""
         self.bot = bot
 
     # ------------ SERVER MANAGEMENT ------------ #
@@ -15,7 +13,7 @@ class AdminManager(commands.Cog, name="Administrator Management"):
     @commands.command(name="setprefix")
     @commands.has_permissions(administrator=True)
     async def _setprefix(self, ctx, arg1):
-        """Sets a custom prefix for the bot on the server"""
+        """Sets a custom prefix for the bot on the server."""
         if len(arg1) > 6:
             await ctx.send("Keep the prefix under 6 chars, please.")
             return
@@ -33,7 +31,7 @@ class AdminManager(commands.Cog, name="Administrator Management"):
     @commands.command(name="forcedescription", aliases=["forcedesc", "admindesc"])
     @commands.has_permissions(administrator=True)
     async def _forcedescription(self, ctx, *args):
-        """Forces a description for a religion"""
+        """Forces a description for a religion."""
         if len(args) < 2:
             await ctx.send("Include both a name and a description!")
             return
@@ -61,35 +59,35 @@ class AdminManager(commands.Cog, name="Administrator Management"):
     @commands.command(name="forcesettype", aliases=["forcetypeset", "forcetype"])
     @commands.has_permissions(administrator=True)
     async def _forcesettype(self, ctx, *args):
-        """Set the type of a God to something else!"""
+        """Set the type of a God to something else."""
         if len(args) < 2:
             await ctx.send("Include both a name and a type!")
             return
 
         god = database.getGodName(args[0], ctx.guild.id)
         if god:
-            godTypes = []
+            godtypes = []
             for godTypeSet in botutils.godtypes:
-                godTypes.append(godTypeSet[0])
+                godtypes.append(godTypeSet[0])
 
-            if args[1].upper() in godTypes:
+            if args[1].upper() in godtypes:
                 database.setType(god.ID, args[1].upper())
                 await ctx.send("Set your God's type successfully!")
             else:
                 types_string = ""
                 i = 1
-                for type in godTypes:
+                for godtype in godtypes:
                     if i == 1:
-                        types_string = type
+                        types_string = godtype
                     else:
-                        types_string = types_string + ", " + type
+                        types_string = types_string + ", " + godtype
                     i += 1
                 await ctx.send("Please choose between these types: `" + types_string + "`!")
 
     @commands.command(name="forcesetgender", aliases=["forcegenderset", "forcegender"])
     @commands.has_permissions(administrator=True)
     async def _forcesetgender(self, ctx, *args):
-        """Set the gender of a God to something else!"""
+        """Set the gender of a God to something else."""
         if len(args) < 2:
             await ctx.send("Include both a name and a gender!")
             return
@@ -108,7 +106,7 @@ class AdminManager(commands.Cog, name="Administrator Management"):
     async def _forcesetpriest(self, ctx, *args):
         """Set the priest of a God!"""
         if len(args) < 2:
-            await ctx.send("Include both a name and a user!")
+            await ctx.send("Include both a name and a user.")
             return
 
         god = database.getGodName(args[0], ctx.guild.id)

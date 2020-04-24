@@ -5,28 +5,30 @@ from Util import logger
 
 class BotManager(commands.Cog, name="Bot Commands"):
     def __init__(self, bot):
+        """Where is the source code? How many guilds is the bot in? How can I invite the bot? All these questions
+        have their answers right here."""
         self.bot = bot
 
     @commands.command(name="source", aliases=["code", "sourcecode"])
     async def _source(self, ctx):
-        """View and/or help with the source code of Gods"""
+        """View and/or help with the source code of Gods."""
         await ctx.send("The source code for Gods can be found here: https://github.com/Fido2603/DiscordGods")
 
     @commands.command(name="support")
     async def _support(self, ctx):
-        """Get help and support regarding the bot"""
+        """Get help and support regarding the bot."""
         await ctx.send("The server where the Gods roam, Treeland: https://discord.gg/PvFPEfd")
 
     @commands.command(name="botinvite", aliases=["invitebot", "addbot"])
     async def _botinvite(self, ctx):
-        """How to invite the bot"""
+        """How to invite the bot."""
         await ctx.send(
             "Invite me to your server with this link: "
             "<https://discordapp.com/oauth2/authorize?scope=bot&client_id=180405652605239296>")
 
     @commands.command(name="botinfo", aliases=["bot"])
     async def _botinfo(self, ctx):
-        """Retrives information about the bot"""
+        """Retrives information about the bot."""
         embed = discord.Embed(title="Bot Information", color=discord.Color.green(),
                               description="")
         embed.add_field(name="Creation Date",
@@ -40,7 +42,7 @@ class BotManager(commands.Cog, name="Bot Commands"):
     @commands.command(name="loadcog", aliases=["loadextension"])
     @commands.is_owner()
     async def _loadcog(self, ctx, arg1):
-        """Loads a cog"""
+        """Loads a cog."""
         bot = self.bot
         try:
             bot.load_extension(f"cogs.{arg1}")
@@ -53,16 +55,17 @@ class BotManager(commands.Cog, name="Bot Commands"):
     @commands.command(name="listcogs", aliases=["cogs"])
     @commands.is_owner()
     async def _listcogs(self, ctx):
-        """Lists all the cogs"""
+        """Lists all the cogs."""
         embed = discord.Embed(title="Cogs", color=discord.Color.green(),
-                              description="`essentials, info, botlists, listenerCog, GodManager`")
+                              description="`AdminManager, BelieverManager, BotLists, BotManager, GodManager, Info, "
+                                          "Misc, Tasks`")
         embed.set_footer(text=ctx.author.name, icon_url=ctx.author.avatar_url)
         await ctx.send(embed=embed)
 
     @commands.command(name="unloadcog", aliases=["unloadextension"])
     @commands.is_owner()
     async def _unloadcog(self, ctx, arg1):
-        """Unloads a cog"""
+        """Unloads a cog."""
         bot = self.bot
         try:
             bot.unload_extension(f"cogs.{arg1}")

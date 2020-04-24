@@ -6,11 +6,11 @@ from discord.ext import commands
 import database
 from Util import logger
 from Util.botutils import botutils
-import datetime
 
 
 class Tasks(commands.Cog, name="Tasks"):
     def __init__(self, bot):
+        """The Cog running the tasks in the background, like clearing old invites, changing the presence etc."""
         self.bot = bot
 
         self.firstrundone = False
@@ -31,7 +31,9 @@ class Tasks(commands.Cog, name="Tasks"):
     @tasks.loop(minutes=30.0)
     async def doPresenceUpdate(self):
         try:
-            await self.bot.change_presence(activity=discord.Game(name="with " + str(database.getBelieversGlobalCount()) + " believers | " + os.getenv('prefix') + "gods help"))
+            await self.bot.change_presence(activity=discord.Game(name="with " + str(database.getBelieversGlobalCount())
+                                                                      + " believers | " + os.getenv('prefix')
+                                                                      + "gods help"))
         except Exception as e:
             logger.logDebug("Error updating presence: " + str(e))
         self.firstrundone = True
@@ -41,7 +43,6 @@ class Tasks(commands.Cog, name="Tasks"):
     @tasks.loop(hours=1.0)
     async def priestTask(self):
         await logger.log("Clearing expired Priest Offers...", self.bot, "DEBUG")
-        date = datetime.datetime.today()
         priestoffers = database.clearOldPriestOffers()
         await logger.log("Cleared expired Priest Offers!", self.bot, "DEBUG")
 
@@ -55,16 +56,16 @@ class Tasks(commands.Cog, name="Tasks"):
             return
 
         await logger.log("Running Falloff's Task...", self.bot, "DEBUG")
-        globalMoodFalloff = random.uniform(0.01, 3.0)
-        globalPowerFalloff = random.uniform(0.01, 0.75)
-        globalPrayerPowerFalloff = random.uniform(0.01, 0.75)
+        global_mood_falloff = random.uniform(0.01, 3.0)
+        global_power_falloff = random.uniform(0.01, 0.75)
+        global_prayerpower_falloff = random.uniform(0.01, 0.75)
 
-        await logger.log("Falloff Round - MoodFalloff: " + str(globalMoodFalloff) + ", PowerFalloff: " +
-                         str(globalPowerFalloff) + ", PrayerPowerFalloff: " + str(globalPrayerPowerFalloff),
+        await logger.log("Falloff Round - MoodFalloff: " + str(global_mood_falloff) + ", PowerFalloff: " +
+                         str(global_power_falloff) + ", PrayerPowerFalloff: " + str(global_prayerpower_falloff),
                          self.bot, "INFO")
 
-        database.doGodsFalloff(globalMoodFalloff, globalPowerFalloff)
-        database.doBelieverFalloffs(globalPrayerPowerFalloff)
+        database.doGodsFalloff(global_mood_falloff, global_power_falloff)
+        database.doBelieverFalloffs(global_prayerpower_falloff)
 
     # ------------ BELIEVER TASKS ------------ #
 

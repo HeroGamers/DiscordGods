@@ -8,6 +8,7 @@ from Util import botutils as utilchecks
 
 class GodManager(commands.Cog, name="Religion Management"):
     def __init__(self, bot):
+        """Manage the religions, create new religions, and set their types as a priest."""
         self.bot = bot
 
     # ------------ GOD MANAGEMENT ------------ #
@@ -15,7 +16,7 @@ class GodManager(commands.Cog, name="Religion Management"):
     @commands.command(name="create", aliases=["newgod"])
     @commands.check(utilchecks.isNotBeliever)
     async def _create(self, ctx, *args):
-        """Creates a new God"""
+        """Creates a new God."""
         user = ctx.author
 
         if database.getBeliever(user.id, ctx.guild.id):
@@ -53,7 +54,7 @@ class GodManager(commands.Cog, name="Religion Management"):
     @commands.command(name="access", aliases=["lock", "open"])
     @commands.check(utilchecks.isPriest)
     async def _access(self, ctx):
-        """Set your religion as open or invite only - Priest only"""
+        """Set your religion as open or invite only."""
         god = database.getBeliever(ctx.author.id, ctx.guild.id).God
 
         if god:
@@ -62,22 +63,22 @@ class GodManager(commands.Cog, name="Religion Management"):
             else:
                 await ctx.send("God is now Open!")
 
-    @commands.command(name="ally", aliases=["friend"])
-    @commands.check(utilchecks.isPriest)
-    async def _ally(self, ctx):
-        """Toggles alliance with another religion - Not done"""
-        logger.logDebug("yes")
-
-    @commands.command(name="war", aliases=["enemy"])
-    @commands.check(utilchecks.isPriest)
-    async def _war(self, ctx):
-        """Toggles war with another religion - Not done"""
-        logger.logDebug("yes")
+    # @commands.command(name="ally", aliases=["friend"])
+    # @commands.check(utilchecks.isPriest)
+    # async def _ally(self, ctx):
+    #     """Toggles alliance with another religion - Not done"""
+    #     logger.logDebug("yes")
+    #
+    # @commands.command(name="war", aliases=["enemy"])
+    # @commands.check(utilchecks.isPriest)
+    # async def _war(self, ctx):
+    #     """Toggles war with another religion - Not done"""
+    #     logger.logDebug("yes")
 
     @commands.command(name="description", aliases=["desc"])
     @commands.check(utilchecks.isPriest)
     async def _description(self, ctx, *args):
-        """Sets a description for your religion"""
+        """Sets a description for your religion."""
         god = database.getBeliever(ctx.author.id, ctx.guild.id).God
 
         if god:
@@ -96,7 +97,7 @@ class GodManager(commands.Cog, name="Religion Management"):
     @commands.command(name="invite", aliases=["inv"])
     @commands.check(utilchecks.isPriest)
     async def _invite(self, ctx, arg1):
-        """Invite someone to your religion"""
+        """Invite someone to your religion."""
         god = database.getBeliever(ctx.author.id, ctx.guild.id).God
         if god:
             user = await botutils.getUser(self.bot, ctx.guild, arg1)
@@ -136,21 +137,21 @@ class GodManager(commands.Cog, name="Religion Management"):
         """Set the type of your God to something else!"""
         god = database.getBeliever(ctx.author.id, ctx.guild.id).God
         if god:
-            godTypes = []
+            godtypes = []
             for godTypeSet in botutils.godtypes:
-                godTypes.append(godTypeSet[0])
+                godtypes.append(godTypeSet[0])
 
-            if arg1.upper() in godTypes:
+            if arg1.upper() in godtypes:
                 database.setType(god.ID, arg1.upper())
                 await ctx.send("Set your God's type successfully!")
             else:
                 types_string = ""
                 i = 1
-                for type in godTypes:
+                for godtype in godtypes:
                     if i == 1:
-                        types_string = type
+                        types_string = godtype
                     else:
-                        types_string = types_string + ", " + type
+                        types_string = types_string + ", " + godtype
                     i += 1
                 await ctx.send("Please choose between these types: `" + types_string + "`!")
 

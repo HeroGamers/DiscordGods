@@ -6,13 +6,14 @@ from Util.botutils import botutils
 
 class Info(commands.Cog, name="Information"):
     def __init__(self, bot):
+        """Get information about different religions, as well as Leaderboards, locally or globally."""
         self.bot = bot
 
     # ------------ INFORMATION ------------ #
 
     @commands.command(name="info", aliases=["godinfo", "i"])
     async def _info(self, ctx, *args):
-        """Gets information about a God"""
+        """Gets information about a God."""
         if len(args) > 0:
             god = database.getGodName(args[0], ctx.guild.id)
         else:
@@ -33,8 +34,8 @@ class Info(commands.Cog, name="Information"):
                 embedcolor = discord.Color.from_rgb(204, 235, 245)
             if god.Type.upper() == "TRAPS":
                 embedcolor = discord.Color.from_rgb(248, 184, 248)
-            for type, color in botutils.godtypes:
-                if type == god.Type:
+            for godtype, color in botutils.godtypes:
+                if godtype == god.Type:
                     embedcolor = color
 
         title = god.Name + " - " + botutils.getGodString(god) + " of " + god.Type.capitalize()
@@ -66,7 +67,7 @@ class Info(commands.Cog, name="Information"):
 
     @commands.command(name="list", aliases=["gods"])
     async def _list(self, ctx):
-        """Lists the top Gods on the server"""
+        """Lists the top Gods on the server."""
         gods = database.getGods(ctx.guild.id)
         if not gods:
             await ctx.send("There are no Gods in " + ctx.guild.name + ", yet... `/gods create <name>`")
@@ -100,7 +101,7 @@ class Info(commands.Cog, name="Information"):
 
     @commands.command(name="globallist", aliases=["globalgods", "glist", "ggods"])
     async def _globallist(self, ctx):
-        """Lists the top Gods globally"""
+        """Lists the top Gods globally."""
         gods = database.getGodsGlobal()
         if not gods:
             await ctx.send("There are no Gods, yet... `/gods create <name>`")
@@ -142,7 +143,7 @@ class Info(commands.Cog, name="Information"):
 
     @commands.command(name="marriages", aliases=["not_singles_like_you", "marrylist"])
     async def _marriages(self, ctx):
-        """Lists the most loving married couples on the server"""
+        """Lists the most loving married couples on the server."""
         marriages = database.getMarriages(ctx.guild.id)
         if not marriages:
             await ctx.send("There are no Marriages in " + ctx.guild.name + ", yet... `/gods marry <someone special>`")
@@ -176,7 +177,7 @@ class Info(commands.Cog, name="Information"):
 
     @commands.command(name="globalmarriages", aliases=["gmarriages", "globalmarrylist"])
     async def _globalmarriages(self, ctx):
-        """Lists the most loving married couples globally"""
+        """Lists the most loving married couples globally."""
         marriages = database.getMarriagesGlobal()
         if not marriages:
             await ctx.send("There are no Marriages, yet... `/gods marry <someone special>`")

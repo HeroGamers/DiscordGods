@@ -11,6 +11,7 @@ from Util import botutils as utilchecks
 
 class BelieverManager(commands.Cog, name="Believer"):
     def __init__(self, bot):
+        """For all your believer needs! Join and leave religions, get married etc."""
         self.bot = bot
         self.proposal_gifs = ["https://cdn.discordapp.com/attachments/473953130371874828/700359948646744154/propose1.gif",
                               "https://cdn.discordapp.com/attachments/473953130371874828/700359962530152498/propose2.gif",
@@ -35,7 +36,7 @@ class BelieverManager(commands.Cog, name="Believer"):
     @commands.command(name="leave", aliases=["yeet"])
     @commands.check(utilchecks.isBeliever)
     async def _leave(self, ctx):
-        """Leaves a religion"""
+        """Leaves a religion."""
         user = ctx.author
 
         believer = database.getBeliever(ctx.author.id, ctx.guild.id)
@@ -61,7 +62,7 @@ class BelieverManager(commands.Cog, name="Believer"):
     @commands.command(name="join", aliases=["enter"])
     @commands.check(utilchecks.isNotBeliever)
     async def _join(self, ctx, arg1):
-        """Joins a religion"""
+        """Joins a religion."""
         believer = database.getBeliever(ctx.author.id, ctx.guild.id)
         if believer:
             if arg1.upper() == believer.God.Name.upper():
@@ -99,7 +100,7 @@ class BelieverManager(commands.Cog, name="Believer"):
     @commands.command(name="no", aliases=["deny", "decline", "reject"])
     @commands.check(utilchecks.hasOffer)
     async def _no(self, ctx):
-        """Reject a proposal from your God"""
+        """Reject a proposal from your God."""
         believer = database.getBeliever(ctx.author.id, ctx.guild.id)
         priestoffer = database.getPriestOffer(believer.God.ID)
 
@@ -110,7 +111,7 @@ class BelieverManager(commands.Cog, name="Believer"):
     @commands.command(name="yes", aliases=["accept"])
     @commands.check(utilchecks.hasOffer)
     async def _yes(self, ctx):
-        """Accept a proposal from your God"""
+        """Accept a proposal from your God."""
         believer = database.getBeliever(ctx.author.id, ctx.guild.id)
         priestoffer = database.getPriestOffer(believer.God.ID)
 
@@ -122,7 +123,7 @@ class BelieverManager(commands.Cog, name="Believer"):
     @commands.command(name="pray", aliases=["p"])
     @commands.check(utilchecks.isBeliever)
     async def _pray(self, ctx):
-        """Pray to your God"""
+        """Pray to your God."""
         believer = database.getBeliever(ctx.author.id, ctx.guild.id)
         if not believer:
             return
@@ -135,11 +136,12 @@ class BelieverManager(commands.Cog, name="Believer"):
             database.pray(believer)
             believer = database.getBelieverByID(believer.ID)
 
-            await ctx.send("You prayed to your God! Your prayer power is now **" + str(round(believer.PrayerPower, 2)) + "**!")
+            await ctx.send("You prayed to your God! Your prayer power is now **" + str(round(believer.PrayerPower, 2))
+                           + "**!")
         else:
-            timeTillPray = 30-minutes
+            time_till_pray = 30-minutes
             await ctx.send("You cannot pray to your " + botutils.getGodString(believer.God) + " yet! Time remaining: "
-                           + str(round(timeTillPray, 1)) + " minutes.")
+                           + str(round(time_till_pray, 1)) + " minutes.")
 
     # ------------ BELIEVER RELATIONSHIPS ------------ #
 
@@ -147,7 +149,7 @@ class BelieverManager(commands.Cog, name="Believer"):
     @commands.check(utilchecks.isBeliever)
     @commands.check(utilchecks.isNotMarried)
     async def _marry(self, ctx, arg1):
-        """Marry that special someone"""
+        """Marry that special someone."""
         guildid = ctx.guild.id
         user1 = ctx.author
         user2 = await botutils.getUser(self.bot, ctx.guild, arg1)
@@ -202,7 +204,8 @@ class BelieverManager(commands.Cog, name="Believer"):
                 state_text = "accepted" if accepted else "denied"
                 embed = discord.Embed(title="Marriage proposal " + state_text + "!",
                                       color=embedcolor, description=accepted_desc if accepted else None)
-                embed.set_author(name=user1.name + " proposed to marry " + user2.name, icon_url=self.bot.user.avatar_url)
+                embed.set_author(name=user1.name + " proposed to marry " + user2.name,
+                                 icon_url=self.bot.user.avatar_url)
 
                 if accepted:
                     database.newMarriage(believer1.ID, believer2.ID, believer1.God)
@@ -215,7 +218,7 @@ class BelieverManager(commands.Cog, name="Believer"):
     @commands.command(name="divorce", aliases=["leave_with_the_kids"])
     @commands.check(utilchecks.isMarried)
     async def _divorce(self, ctx):
-        """Leave your special someone and take the kids with you"""
+        """Leave your special someone and take the kids with you."""
         believer = database.getBeliever(ctx.author.id, ctx.guild.id)
         marriage = database.getMarriage(believer.ID)
 

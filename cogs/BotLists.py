@@ -8,6 +8,7 @@ from Util import logger
 
 class BotLists(commands.Cog):
     def __init__(self, bot):
+        """A cog for the several botlists."""
         self.bot = bot
         self.topgg_token = os.getenv('top.gg_token')  # https://top.gg/
         self.dbotsgg_token = os.getenv('discord.bots.gg_token')  # https://discord.bots.gg/
@@ -23,7 +24,7 @@ class BotLists(commands.Cog):
         """This function runs every 30 minutes to automatically update the server count across multiple bot lists."""
         guilds = len(self.bot.guilds)
         users = len(set(self.bot.get_all_members()))
-        id = str(self.bot.user.id)
+        botid = str(self.bot.user.id)
         logger.logDebug("Attempting to post server counts...", "INFO")
 
         # top.gg
@@ -39,7 +40,7 @@ class BotLists(commands.Cog):
         headers = {'Authorization': self.dbotsgg_token,
                    'Content-Type': "application/json"}
         payload = {'guildCount': guilds}
-        url = "https://discord.bots.gg/api/v1/bots/" + id + "/stats"
+        url = "https://discord.bots.gg/api/v1/bots/" + botid + "/stats"
         resp = requests.post(url=url, headers=headers, data=json.dumps(payload))
         logger.logDebug("Response from " + site + ": " + str(resp), "INFO")
 
@@ -49,7 +50,7 @@ class BotLists(commands.Cog):
                    'Content-Type': "application/json"}
         payload = {'guilds': guilds,
                    'users': users}
-        url = "https://discordbotlist.com/api/bots/" + id + "/stats"
+        url = "https://discordbotlist.com/api/bots/" + botid + "/stats"
         resp = requests.post(url=url, headers=headers, data=json.dumps(payload))
         logger.logDebug("Response from " + site + ": " + str(resp), "INFO")
 
@@ -58,7 +59,7 @@ class BotLists(commands.Cog):
         headers = {'Authorization': self.botsondiscordxyz_token,
                    'Content-Type': "application/json"}
         payload = {'guildCount': guilds}
-        url = "https://discordbotlist.com/bot-api/bots/" + id + "/guilds"
+        url = "https://discordbotlist.com/bot-api/bots/" + botid + "/guilds"
         resp = requests.post(url=url, headers=headers, data=json.dumps(payload))
         logger.logDebug("Response from " + site + ": " + str(resp), "INFO")
 

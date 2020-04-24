@@ -7,6 +7,9 @@ import datetime
 import os
 from Util import logger
 
+# This file mostly consists of different, quite identical, calls to the database, and as such functions look quite
+# alike. For this reason, the "issues" with duplicates are ignored from this file on Code Climate.
+
 # Initiation of database
 if os.getenv('db_type') is not None and os.getenv('db_type').upper() == "MYSQL":
     host = "localhost"
@@ -38,7 +41,8 @@ if os.getenv('db_type') is not None and os.getenv('db_type').upper() == "MYSQL":
             print("An error occured while trying to connect to the MySQL Database: " + str(e) + ". Using flatfile...")
             db = SqliteDatabase('./Gods.db')
         elif "Unknown database" in str(e):
-            print("An error occured while trying to connect to the MySQL Database: " + str(e) + ". Trying to create database...")
+            print("An error occured while trying to connect to the MySQL Database: " + str(e) +
+                  ". Trying to create database...")
             try:
                 conn = pymysql.connect(host=host, user=user, password=os.getenv('db_pword'), port=int(port))
                 conn.cursor().execute('CREATE DATABASE gods')
@@ -84,12 +88,12 @@ class gods(Model):
 
 
 # Adding new gods to the DB
-def newGod(guild, name, type, gender=None):
+def newGod(guild, name, godtype, gender=None):
     try:
-        god = gods.create(Guild=guild, Name=name, Type=type, Gender=gender)
+        god = gods.create(Guild=guild, Name=name, Type=godtype, Gender=gender)
         return god
-    except Exception as e:
-        logger.logDebug("Error doing new marriage - " + str(e), "ERROR")
+    except Exception as error:
+        logger.logDebug("Error doing new marriage - " + str(error), "ERROR")
         return False
 
 
@@ -160,8 +164,8 @@ def setDesc(godid, desc):
 
 
 # Set a type for a God
-def setType(godid, type):
-    query = gods.update(Type=type).where(gods.ID == godid)
+def setType(godid, godtype):
+    query = gods.update(Type=godtype).where(gods.ID == godid)
     query.execute()
 
 
@@ -221,8 +225,8 @@ def newBeliever(userid, god):
     try:
         believer = believers.create(UserID=userid, God=god)
         return believer
-    except Exception as e:
-        logger.logDebug("Error doing new believer - " + str(e), "ERROR")
+    except Exception as error:
+        logger.logDebug("Error doing new believer - " + str(error), "ERROR")
         return False
 
 
@@ -279,15 +283,16 @@ def pray(believerInput):
     query = gods.update(Power=(believerInput.God.Power+1)).where(gods.ID == believerInput.God.ID)
     query.execute()
 
-    moodRaise = 10
-    query = gods.update(Mood=(believerInput.God.Mood+moodRaise)).where((gods.ID == believerInput.God.ID) &
-                                                                       (gods.Mood < (100 - moodRaise)))
+    moodraise = 10
+    query = gods.update(Mood=(believerInput.God.Mood+moodraise)).where((gods.ID == believerInput.God.ID) &
+                                                                       (gods.Mood < (100 - moodraise)))
     query.execute()
 
 
 # Subtract prayerpower on all believers
 def doBelieverFalloffs(falloffPrayerPower):
-    query = believers.update(PrayerPower=(believers.PrayerPower - falloffPrayerPower)).where(believers.PrayerPower > (0 + falloffPrayerPower))
+    query = believers.update(PrayerPower=(believers.PrayerPower - falloffPrayerPower)).where(believers.PrayerPower >
+                                                                                             (0 + falloffPrayerPower))
     query.execute()
 
 
@@ -318,8 +323,8 @@ def newMarriage(believer1, believer2, god):
     try:
         marriage = marriages.create(God=god, Believer1=believer1, Believer2=believer2)
         return marriage
-    except Exception as e:
-        logger.logDebug("Error doing new marriage - " + str(e), "ERROR")
+    except Exception as error:
+        logger.logDebug("Error doing new marriage - " + str(error), "ERROR")
         return False
 
 
@@ -381,8 +386,8 @@ def newInvite(godid, userid):
     try:
         invite = offers.create(God=godid, Type=1, UserID=userid)
         return invite
-    except Exception as e:
-        logger.logDebug("Error doing new invite - " + str(e), "ERROR")
+    except Exception as error:
+        logger.logDebug("Error doing new invite - " + str(error), "ERROR")
         return False
 
 
@@ -416,8 +421,8 @@ def newPriestOffer(godid, userid):
     try:
         priestoffer = offers.create(God=godid, Type=2, UserID=userid)
         return priestoffer
-    except Exception as e:
-        logger.logDebug("Error doing new priestoffer - " + str(e), "ERROR")
+    except Exception as error:
+        logger.logDebug("Error doing new priestoffer - " + str(error), "ERROR")
         return False
 
 
@@ -442,12 +447,12 @@ def deletePriestOffer(offerid):
 # Get and clear old priest offers
 def clearOldPriestOffers():
     date = datetime.datetime.today() - datetime.timedelta(days=1)
-    priestOffers = offers.select().where((offers.Type == 2) & (offers.CreationDate < date))
-    if priestOffers.exists():
-        priestOffers = priestOffers.execute()
+    priestoffers = offers.select().where((offers.Type == 2) & (offers.CreationDate < date))
+    if priestoffers.exists():
+        priestoffers = priestoffers.execute()
         query = offers.delete().where((offers.Type == 2) & (offers.CreationDate < date))
         query.execute()
-        return priestOffers
+        return priestoffers
     return False
 
 
@@ -470,8 +475,8 @@ def newGuild(guildid):
     try:
         guild = guilds.create(Guild=guildid)
         return guild
-    except Exception as e:
-        logger.logDebug("Error doing new guild - " + str(e), "ERROR")
+    except Exception as error:
+        logger.logDebug("Error doing new guild - " + str(error), "ERROR")
         return False
 
 
