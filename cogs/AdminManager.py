@@ -6,9 +6,27 @@ from Util.botutils import botutils
 from Util import botutils as utilchecks
 
 
-class AdminManager(commands.Cog, name="Admin Religion Management"):
+class AdminManager(commands.Cog, name="Administrator Management"):
     def __init__(self, bot):
         self.bot = bot
+
+    # ------------ SERVER MANAGEMENT ------------ #
+
+    @commands.command(name="setprefix")
+    @commands.has_permissions(administrator=True)
+    async def _setprefix(self, ctx, arg1):
+        """Sets a custom prefix for the bot on the server"""
+        if len(arg1) > 6:
+            await ctx.send("Keep the prefix under 6 chars, please.")
+            return
+
+        guildconfig = database.getGuild(ctx.guild.id)
+
+        if not guildconfig:
+            guildconfig = database.newGuild(ctx.guild.id)
+
+        database.setPrefix(guildconfig.ID, arg1)
+        await ctx.send("Prefix set successfully!")
 
     # ------------ GOD MANAGEMENT ------------ #
 
@@ -52,7 +70,7 @@ class AdminManager(commands.Cog, name="Admin Religion Management"):
         if god:
             godTypes = []
             for godTypeSet in botutils.godtypes:
-                godTypes.append(godTypeSet[1])
+                godTypes.append(godTypeSet[0])
 
             if args[1].upper() in godTypes:
                 database.setType(god.ID, args[1].upper())

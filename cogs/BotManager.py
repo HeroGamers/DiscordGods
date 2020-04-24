@@ -7,8 +7,8 @@ class BotManager(commands.Cog, name="Bot Commands"):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="code", aliases=["source", "sourcecode"])
-    async def _code(self, ctx):
+    @commands.command(name="source", aliases=["code", "sourcecode"])
+    async def _source(self, ctx):
         """View and/or help with the source code of Gods"""
         await ctx.send("The source code for Gods can be found here: https://github.com/Fido2603/DiscordGods")
 

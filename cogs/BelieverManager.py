@@ -144,6 +144,7 @@ class BelieverManager(commands.Cog, name="Believer"):
     # ------------ BELIEVER RELATIONSHIPS ------------ #
 
     @commands.command(name="marry", aliases=["propose"])
+    @commands.check(utilchecks.isBeliever)
     @commands.check(utilchecks.isNotMarried)
     async def _marry(self, ctx, arg1):
         """Marry that special someone"""
@@ -235,27 +236,6 @@ class BelieverManager(commands.Cog, name="Believer"):
             await ctx.send("Your lover could not be found!\n*But don't worry, we got ya' divorced anyway!*")
         else:
             await ctx.send(ctx.author.name + " just divorced " + lover.name + "!")
-
-    @commands.command(name="love", aliases=["kiss"])
-    @commands.check(utilchecks.isMarried)
-    async def _love(self, ctx):
-        """Shows your special someone that you love them"""
-        believer = database.getBeliever(ctx.author.id, ctx.guild.id)
-        marriage = database.getMarriage(believer.ID)
-
-        if not marriage:
-            await ctx.send("You are not married, bozo!")
-            return
-
-        # Update LoveDate
-        database.doLove(marriage.ID)
-
-        # Send message
-        if marriage.Believer1.UserID == str(ctx.author.id):
-            loverid = marriage.Believer2.UserID
-        else:
-            loverid = marriage.Believer1.UserID
-        await ctx.send("<@" + loverid + "> - " + ctx.author.name + " loves you!")
 
 
 def setup(bot):

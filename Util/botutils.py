@@ -1,3 +1,4 @@
+import os
 import random
 
 import discord
@@ -78,6 +79,16 @@ class botutils():
                 ("WISDOM", discord.Color.dark_purple()),
                 ("NATURE", discord.Color.green())]
 
+    # Function to get the currently used prefix
+    @classmethod
+    def getPrefix(cls, guildid):
+        guildconfig = database.getGuild(guildid)
+
+        if not guildconfig:
+            return os.getenv("prefix")
+        else:
+            return guildconfig.Prefix
+
     # Function used to try and get users from arguments
     @classmethod
     async def getUser(cls, bot, guild, arg):
@@ -143,7 +154,7 @@ class botutils():
     async def doNewPriestOffer(cls, bot, god, old_priestoffer=None):
         believers = database.getBelieversByID(god.ID)
 
-        if len(believers) >= 2:
+        if len(believers) >= 3:
             logger.logDebug("More than 3 believers in god, choosing new priest candidate!")
             iterations = 0
             while True:
@@ -171,11 +182,12 @@ class botutils():
 
                 # Send the message to the user about being selected as new Priest
                 guild = bot.get_guild(int(god.Guild))
+                prefix = cls.getPrefix(guild.id)
                 try:
                     await dm_channel.send(
                         "Congratulations! You've been selected as the priest for **" + god.Name + "** on "
-                        "the " + guild.name + " server!\nWrite `/gods accept` to accept the request, or "
-                        "`/gods deny` to decline the request, on that server!")
+                        "the " + guild.name + " server!\nWrite `"+prefix+"gods accept` to accept the "
+                        "request, or `"+prefix+"gods deny` to decline the request, on that server!")
                 except Exception as e:
                     # if we can't send the DM, the user probably has DM's off, at which point we would uhhh, yes
                     await logger.log(
@@ -194,8 +206,9 @@ class botutils():
                         bot_permissions = channel.permissions_for(bot_member)
                         if user_permissions.send_messages & bot_permissions.send_messages:
                             await channel.send("<@" + str(user.id) + "> has been selected as the priest for **" +
-                                               god.Name + "**!\nWrite `/gods accept` to accept the "
-                                               "request, or `/gods deny` to decline the request!")
+                                               god.Name + "**!\nWrite `"+prefix+"gods accept` to accept "
+                                               "the request, or `"+prefix+"gods deny` to decline "
+                                               "the request!")
                             break
                 # Jump out of while loop
                 break

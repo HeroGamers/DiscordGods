@@ -1,10 +1,60 @@
+import os
+
+import pymysql
 from peewee import SqliteDatabase, Model, CharField, DateTimeField, AutoField, ForeignKeyField, BooleanField, \
-    IntegerField, BitField, FloatField
+    IntegerField, BitField, FloatField, MySQLDatabase, OperationalError, InternalError
 import datetime
+import os
 from Util import logger
 
-db = SqliteDatabase('./Gods.db')
+# Initiation of database
+if os.getenv('db_type') is not None and os.getenv('db_type').upper() == "MYSQL":
+    host = "localhost"
+    if os.getenv('db_host'):
+        host = os.getenv('db_host')
+    else:
+        print("Database host is empty, using " + host + " as host...")
 
+    user = "root"
+    if os.getenv('db_user'):
+        user = os.getenv('db_user')
+    else:
+        print("Database user is empty, using " + user + " as user...")
+
+    port = "3306"
+    if os.getenv('db_port'):
+        port = os.getenv('db_port')
+    else:
+        print("Database port is empty, using " + port + " as port...")
+
+    db = MySQLDatabase('gods', user=user, password=os.getenv('db_pword'), host=host,
+                       port=int(port))
+
+    # Check for possible connection issues to the db
+    try:
+        db.connection()
+    except Exception as e:
+        if "Can't connect" in str(e):
+            print("An error occured while trying to connect to the MySQL Database: " + str(e) + ". Using flatfile...")
+            db = SqliteDatabase('./Gods.db')
+        elif "Unknown database" in str(e):
+            print("An error occured while trying to connect to the MySQL Database: " + str(e) + ". Trying to create database...")
+            try:
+                conn = pymysql.connect(host=host, user=user, password=os.getenv('db_pword'), port=int(port))
+                conn.cursor().execute('CREATE DATABASE gods')
+                conn.close()
+                print("Created Database!")
+            except Exception as e:
+                print("An error occured while trying to create the gods Database: " + str(e) + ". Using flatfile...")
+                db = SqliteDatabase('./Gods.db')
+    except InternalError as e:
+        print("An error occured while trying to use the MySQL Database: " + str(e) + ". Mi...")
+        db = SqliteDatabase('./Gods.db')
+else:
+    print("Database type is not set to MYSQL, using flatfile...")
+    db = SqliteDatabase('./Gods.db')
+
+# Constant variables
 snowflake_max_length = 20  # It is currently 18, but max size of uint64 is 20 chars
 discordtag_max_length = 37  # Max length of usernames are 32 characters, added # and the discrim gives 37
 guildname_max_length = 100  # For some weird reason guild names can be up to 100 chars... whatevs lol
@@ -241,6 +291,12 @@ def doBelieverFalloffs(falloffPrayerPower):
     query.execute()
 
 
+# Subtract prayerpower from a believer
+def subtractPrayerPower(believerid, power):
+    query = believers.update(PrayerPower=(believers.PrayerPower - power)).where(believers.ID == believerid)
+    query.execute()
+
+
 # --------------------------------------------------- MARRIAGES ---------------------------------------------------- #
 
 
@@ -395,12 +451,50 @@ def clearOldPriestOffers():
     return False
 
 
+# ------------------------------------------ CUSTOM CONFIGS FOR GUILDS ------------------------------------------ #
+
+
+# The Guilds Table
+class guilds(Model):
+    ID = AutoField()
+    Guild = CharField(max_length=snowflake_max_length)
+    Prefix = CharField(null=True, max_length=6)
+    GodRoles = BooleanField(default=False)
+
+    class Meta:
+        database = db
+
+
+# Adding new guild to the DB
+def newGuild(guildid):
+    try:
+        guild = guilds.create(Guild=guildid)
+        return guild
+    except Exception as e:
+        logger.logDebug("Error doing new guild - " + str(e), "ERROR")
+        return False
+
+
+# Get a guild from the DB
+def getGuild(guildid):
+    query = guilds.select().where(guilds.Guild == str(guildid))
+    if query.exists():
+        return query[0]
+    return False
+
+
+# Set a prefix for a guild
+def setPrefix(guildconfigid, prefix):
+    query = guilds.update(Prefix=prefix).where(guilds.ID == guildconfigid)
+    query.execute()
+
+
 # -------------------------------------------------- SETUP OF TABLES ------------------------------------------------- #
 
 
 def create_tables():
     with db:
-        db.create_tables([gods, believers, marriages, offers])
+        db.create_tables([gods, believers, marriages, offers, guilds])
 
 
 create_tables()

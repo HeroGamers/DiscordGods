@@ -1,16 +1,16 @@
-import discord
-from discord.ext import commands
-from discord import Embed, Permissions
-from Util import logger
-import os
-import database
-
 # Import the config
 try:
     import config
 except ImportError:
     print("Couldn't import config.py! Exiting!")
     exit()
+
+import discord
+from discord.ext import commands
+from discord import Embed
+from Util import logger
+import database
+import os
 
 # Import a monkey patch, if that exists
 try:
@@ -19,8 +19,19 @@ except ImportError:
     print("DEBUG: No Monkey patch found!")
 
 
-bot = commands.Bot(command_prefix=(os.getenv('prefix')+"gods ", os.getenv('prefix')+"g "),
-                   description='Religion has never been easier!',
+async def getPrefix(bot, message):
+    guild = message.guild
+
+    prefixes = [os.getenv('prefix')+"gods ", os.getenv('prefix')+"g ", "<@"+str(bot.user.id)+"> ", "<@!"+str(bot.user.id)+"> "]
+
+    if guild:
+        guildconfig = database.getGuild(guild.id)
+        if guildconfig:
+            prefixes.append(guildconfig.Prefix)
+    return prefixes
+
+
+bot = commands.Bot(command_prefix=getPrefix, description='Religion has never been easier!',
                    activity=discord.Game(name="...starting up!"))
 
 
@@ -86,18 +97,16 @@ async def on_message(message: discord.Message):
     if message.author.bot:
         return
     ctx: commands.Context = await bot.get_context(message)
-    if message.content.startswith(os.getenv('prefix')+"gods ") or message.content.startswith(os.getenv('prefix')+"g "):
-        if ctx.command is not None:
-            if isinstance(message.channel, discord.DMChannel):
-                await logger.log("`%s` (%s) used the `%s` command in their DM's" % (
-                    ctx.author.name, ctx.author.id, ctx.invoked_with), bot, "INFO")
-            else:
-                await logger.log("`%s` (%s) used the `%s` command in the guild `%s` (%s), in the channel `%s` (%s)" % (
-                    ctx.author.name, ctx.author.id, ctx.invoked_with, ctx.guild.name, ctx.guild.id, ctx.channel.name,
-                    ctx.channel.id), bot, "INFO")
-            await bot.invoke(ctx)
-    else:
-        return
+
+    if ctx.command is not None:
+        if isinstance(message.channel, discord.DMChannel):
+            await logger.log("`%s` (%s) used the `%s` command in their DM's" % (
+                ctx.author.name, ctx.author.id, ctx.invoked_with), bot, "INFO")
+        else:
+            await logger.log("`%s` (%s) used the `%s` command in the guild `%s` (%s), in the channel `%s` (%s)" % (
+                ctx.author.name, ctx.author.id, ctx.invoked_with, ctx.guild.name, ctx.guild.id, ctx.channel.name,
+                ctx.channel.id), bot, "INFO")
+        await bot.invoke(ctx)
 
 
 if __name__ == '__main__':
