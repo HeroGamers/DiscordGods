@@ -21,7 +21,7 @@ class BotLists(commands.Cog):
 
     @tasks.loop(minutes=30.0)
     async def update_stats(self):
-        """This function runs every 30 minutes to automatically update the server count across multiple bot lists."""
+        """Runs every 30 minutes to automatically update the server count across multiple bot lists."""
         guilds = len(self.bot.guilds)
         users = len(set(self.bot.get_all_members()))
         botid = str(self.bot.user.id)

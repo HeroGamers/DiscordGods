@@ -5,8 +5,7 @@ from Util import logger
 
 class BotManager(commands.Cog, name="Bot Commands"):
     def __init__(self, bot):
-        """Where is the source code? How many guilds is the bot in? How can I invite the bot? All these questions
-        have their answers right here."""
+        """Where is the source code? How can I invite the bot? All these questions have their answers right here."""
         self.bot = bot
 
     @commands.command(name="source", aliases=["code", "sourcecode"])

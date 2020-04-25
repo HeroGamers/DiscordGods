@@ -174,8 +174,8 @@ class BelieverManager(commands.Cog, name="Believer"):
             god = believer1.God
             embedcolor = discord.Color.dark_gold()
             if god.Type:
-                for type, color in botutils.godtypes:
-                    if type == god.Type:
+                for godtype, color in botutils.godtypes:
+                    if godtype == god.Type:
                         embedcolor = color
 
             embed = discord.Embed(title="Marriage proposal", color=embedcolor,

@@ -1,8 +1,6 @@
-import os
-
 import pymysql
 from peewee import SqliteDatabase, Model, CharField, DateTimeField, AutoField, ForeignKeyField, BooleanField, \
-    IntegerField, BitField, FloatField, MySQLDatabase, OperationalError, InternalError
+    IntegerField, BitField, FloatField, MySQLDatabase, InternalError
 import datetime
 import os
 from Util import logger
