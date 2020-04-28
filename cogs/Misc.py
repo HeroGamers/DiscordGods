@@ -11,6 +11,24 @@ import database
 class Misc(commands.Cog, name="Miscellaneous"):
     hug_lines = ["{user} hugs {target}! Awaaa~", "{user} hugs {target} tightly!"]
     kiss_lines = ["{user} loves {target}!", "{user} kisses {target}!", "{user} loves {target} so, so very much!"]
+    hug_gifs = ["https://cdn.discordapp.com/attachments/473953130371874828/704725705098788874/hug1.gif",
+                "https://cdn.discordapp.com/attachments/473953130371874828/704725689613418646/hug2.gif",
+                "https://cdn.discordapp.com/attachments/473953130371874828/704725700300636351/hug3.gif",
+                "https://cdn.discordapp.com/attachments/473953130371874828/704725701839945728/hug4.gif"]
+    kiss_gifs = ["https://cdn.discordapp.com/attachments/473953130371874828/704727485132046537/kiss1.gif",
+                 "https://cdn.discordapp.com/attachments/473953130371874828/704727464072577104/kiss2.gif",
+                 "https://cdn.discordapp.com/attachments/473953130371874828/704727475388809266/kiss3.gif",
+                 "https://cdn.discordapp.com/attachments/473953130371874828/704727484565815417/kiss4.gif",
+                 "https://cdn.discordapp.com/attachments/473953130371874828/704727485283172383/kiss5.gif",
+                 "https://cdn.discordapp.com/attachments/473953130371874828/704727487980241026/kiss6.gif",
+                 "https://cdn.discordapp.com/attachments/473953130371874828/704727491335422042/kiss7.gif",
+                 "https://cdn.discordapp.com/attachments/473953130371874828/704727514425327646/kiss8.gif",
+                 "https://cdn.discordapp.com/attachments/473953130371874828/704727493466128524/kiss9.gif",
+                 "https://cdn.discordapp.com/attachments/473953130371874828/704727499161993236/kiss10.gif",
+                 "https://cdn.discordapp.com/attachments/473953130371874828/704727500667879564/kiss11.gif",
+                 "https://cdn.discordapp.com/attachments/473953130371874828/704727517478649906/kiss12.gif",
+                 "https://cdn.discordapp.com/attachments/473953130371874828/704727542342484098/kiss13.gif",
+                 "https://cdn.discordapp.com/attachments/473953130371874828/704727515671035954/kiss14.gif"]
 
     def __init__(self, bot):
         """Fun commands - Some of them are free, others cost Prayer Power."""
@@ -53,10 +71,10 @@ class Misc(commands.Cog, name="Miscellaneous"):
         # Get action line
         if "hug" in action.lower():
             action_line = random.choice(cls.hug_lines).replace("{user}", user.name).replace("{target}", target.name)
-            # embed.set_image(url=random.choice(self.huggifs))
-        if "kiss" in action.lower():
+            embed.set_image(url=random.choice(cls.hug_gifs))
+        elif "kiss" in action.lower():
             action_line = random.choice(cls.kiss_lines).replace("{user}", user.name).replace("{target}", target.name)
-            # embed.set_image(url=random.choice(self.kissgifs))
+            embed.set_image(url=random.choice(cls.kiss_gifs))
         else:
             action_line = "Error!"
 
@@ -73,6 +91,13 @@ class Misc(commands.Cog, name="Miscellaneous"):
             return
 
         target = await botutils.getUser(self.bot, ctx.guild, arg1)
+        if target.id == ctx.author.id:
+            await ctx.send("You cannot hug yourself! Sad, we know...")
+            return
+        if target.bot:
+            await ctx.send("Even though I think the bot appreciates your hugs, I don't think it would feel it...")
+            return
+
         await ctx.send(embed=self.getMiscEmbed(believer, ctx.author, target, "HUGS"))
 
         database.subtractPrayerPower(believer.ID, 0.5)

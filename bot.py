@@ -9,6 +9,7 @@ import discord
 from discord.ext import commands
 from discord import Embed
 from Util import logger
+from Util.botutils import botutils
 import database
 import os
 
@@ -90,6 +91,17 @@ async def on_command_error(ctx: commands.Context, error):
 @bot.event
 async def on_guild_join(guild):
     await logger.log("Joined a new guild (`%s` - `%s`)" % (guild.name, guild.id), bot, "INFO")
+
+
+@bot.event
+async def on_guild_remove(guild):
+    await logger.log("Left a new guild (`%s` - `%s`)" % (guild.name, guild.id), bot, "INFO")
+
+    # Disband any gods in the guild
+    gods = database.getGods(guild.id)
+    if gods:
+        for god in gods:
+            botutils.disbandGod(god.ID)
 
 
 @bot.event

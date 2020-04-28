@@ -10,6 +10,7 @@ Gods.db-journal
 monkeyPatch.py
 config-alt.py
 docs/.idea/
+gifs/
 
 # Editors
 **/.idea/workspace.xml

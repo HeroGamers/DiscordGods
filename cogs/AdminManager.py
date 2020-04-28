@@ -104,7 +104,7 @@ class AdminManager(commands.Cog, name="Administrator Management"):
     @commands.command(name="forcesetpriest", aliases=["forcepriest", "adminpriest"])
     @commands.has_permissions(administrator=True)
     async def _forcesetpriest(self, ctx, *args):
-        """Set the priest of a God!"""
+        """Set the priest of a God."""
         if len(args) < 2:
             await ctx.send("Include both a name and a user.")
             return
@@ -130,6 +130,20 @@ class AdminManager(commands.Cog, name="Administrator Management"):
             database.setPriest(god.ID, believer.ID)
 
             await ctx.send("Priest successfully set!")
+
+    @commands.command(name="forcedeletegod", aliases=["deletegod", "removegod", "forcedisbandgod"])
+    @commands.has_permissions(administrator=True)
+    async def _forcedeletegod(self, ctx, arg1):
+        """Removes a religion from the server."""
+
+        god = database.getGodName(arg1, ctx.guild.id)
+        if god:
+            if botutils.disbandGod(god.ID):
+                await ctx.send("God disbanded successfully!")
+            else:
+                await ctx.send("An error occurred doing that!")
+        else:
+            await ctx.send("A god with that name doesn't exist!")
 
 
 def setup(bot):

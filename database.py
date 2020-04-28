@@ -129,8 +129,8 @@ def getGod(godid):
 
 
 # Gets all Gods in a guild
-def getGods(guild):
-    query = gods.select().where(gods.Guild == str(guild)).order_by(gods.Power)
+def getGods(guildid):
+    query = gods.select().where(gods.Guild == str(guildid)).order_by(gods.Power)
     return query
 
 
@@ -259,6 +259,15 @@ def getBelieversGlobalCount():
 
 # Leave a god
 def leaveGod(userid, guild):
+    believer = getBeliever(userid, guild)
+    query = believer.delete_instance()
+    if query == 1:
+        return True
+    return False
+
+
+# Leave a god, by ID
+def leaveGodID(believerid):
     believer = getBeliever(userid, guild)
     query = believer.delete_instance()
     if query == 1:

@@ -212,3 +212,22 @@ class botutils:
                 break
         else:
             logger.logDebug("Not more than 3 believers in god, skipping new priest candidate check")
+
+    @classmethod
+    def disbandGod(cls, godid):
+        god = database.getGod(godid)
+        if not god:
+            return False
+
+        believers = database.getBelieversByID(god.ID)
+
+        if believers:
+            for believer in believers:
+                if not believer:
+                    return True
+
+                believer.delete_instance()
+
+        god.delete_instance()
+
+        return True
