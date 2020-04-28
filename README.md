@@ -18,7 +18,7 @@ You can invite Gods to your servers, and thus enable your members to create thei
 <div align="center">
 <h3>Invite Gods</h3>
 
-[![Invite Gods](https://img.shields.io/static/v1.svg?label=Invite%20Gods&message=Ban%20Permissions&color=7289DA&stile=flat&logo=discord&logoColor=7289DA&labelColor=2C2F33)](https://discordapp.com/oauth2/authorize?client_id=475447317072183306&scope=bot&permissions=4)
+[![Invite Gods](https://img.shields.io/static/v1.svg?label=Invite%20Gods&message=Ban%20Permissions&color=7289DA&stile=flat&logo=discord&logoColor=7289DA&labelColor=2C2F33)](https://discordapp.com/oauth2/authorize?scope=bot&client_id=180405652605239296)
 </div>
 
 ### Leaving Feedback // Getting Support
