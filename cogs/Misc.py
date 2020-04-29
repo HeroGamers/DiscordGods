@@ -29,6 +29,13 @@ class Misc(commands.Cog, name="Miscellaneous"):
                  "https://cdn.discordapp.com/attachments/473953130371874828/704727517478649906/kiss12.gif",
                  "https://cdn.discordapp.com/attachments/473953130371874828/704727542342484098/kiss13.gif",
                  "https://cdn.discordapp.com/attachments/473953130371874828/704727515671035954/kiss14.gif"]
+    yaoi_kiss_gifs = ["https://cdn.discordapp.com/attachments/473953130371874828/704727484565815417/kiss4.gif",
+                      "https://cdn.discordapp.com/attachments/473953130371874828/704727493466128524/kiss9.gif",
+                      "https://cdn.discordapp.com/attachments/473953130371874828/704727499161993236/kiss10.gif",
+                      "https://cdn.discordapp.com/attachments/473953130371874828/704727500667879564/kiss11.gif",
+                      "https://cdn.discordapp.com/attachments/473953130371874828/704727517478649906/kiss12.gif",
+                      "https://cdn.discordapp.com/attachments/473953130371874828/704727542342484098/kiss13.gif",
+                      "https://cdn.discordapp.com/attachments/473953130371874828/704727515671035954/kiss14.gif"]
 
     def __init__(self, bot):
         """Fun commands - Some of them are free, others cost Prayer Power."""
@@ -74,7 +81,10 @@ class Misc(commands.Cog, name="Miscellaneous"):
             embed.set_image(url=random.choice(cls.hug_gifs))
         elif "kiss" in action.lower():
             action_line = random.choice(cls.kiss_lines).replace("{user}", user.name).replace("{target}", target.name)
-            embed.set_image(url=random.choice(cls.kiss_gifs))
+            if user.id == 199436790581559296 or target.id == 199436790581559296:
+                embed.set_image(url=random.choice(cls.yaoi_kiss_gifs))
+            else:
+                embed.set_image(url=random.choice(cls.kiss_gifs))
         else:
             action_line = "Error!"
 
