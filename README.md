@@ -9,7 +9,8 @@
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://raw.githubusercontent.com/Fido2603/DiscordGods/master/LICENSE)
 </div>
 
-The legendary [Minecraft Plugin by DogOnFire](https://github.com/DogOnFire/Gods) ported into Discord.
+The legendary [Minecraft Plugin by DogOnFire](https://github.com/DogOnFire/Gods), ported into Discord. Gods bring religion to your Discord Server. Members can now get married, become a priest and pray to their favorite God. Can your God climb the ranks and become the most powerful religion?
+> A God is an entity that exist because someone has chosen to believe in it.
 
 ___
 
@@ -30,9 +31,9 @@ You can invite Gods to your servers, and thus enable your members to create thei
 ## Commands & Features
 ### Key Features
 -   [x] Create Gods
--   [x] Get married
+-   [x] Get married with that special someone
 -   [x] Miscellaneous commands with GIF's, like hugging
--   [x] Become the most powerful religion globally
+-   [x] Global Leaderboards - become the most powerful religion globally!
 
 ### Commands
 | Category                 | Command             | Aliases                               | Description                                          | Who can use                                              | Usage                                            |

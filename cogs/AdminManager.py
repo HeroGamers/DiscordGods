@@ -135,7 +135,6 @@ class AdminManager(commands.Cog, name="Administrator Management"):
     @commands.has_permissions(administrator=True)
     async def _forcedeletegod(self, ctx, arg1):
         """Removes a religion from the server."""
-
         god = database.getGodName(arg1, ctx.guild.id)
         if god:
             if botutils.disbandGod(god.ID):

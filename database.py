@@ -273,7 +273,7 @@ def leaveGod(userid, guild):
 
 # Leave a god, by ID
 def leaveGodID(believerid):
-    believer = getBeliever(userid, guild)
+    believer = getBelieverByID(believerid)
     query = believer.delete_instance()
     if query == 1:
         return True
