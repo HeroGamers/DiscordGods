@@ -38,6 +38,7 @@ bot = commands.Bot(command_prefix=getPrefix, description='Religion has never bee
 
 startup_extensions = ["BotManager",
                       "GodManager",
+                      "BotLists",
                       "BelieverManager",
                       "Info",
                       "Tasks",
