@@ -16,6 +16,11 @@ body {
 	margin-top: 60px; /* Margin top by navbar height */
 	background-color: #222222;
 	color: azure;
+	-ms-overflow-style: none;
+}
+
+body::-webkit-scrollbar {
+	display: none;
 }
 
 h1 {
@@ -94,7 +99,7 @@ section>div[class*="row"]>div[class*="col-"] {
 
 /* Sections */
 #intro div {
-	min-height: 60vh;
+	min-height: 20vh;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -114,7 +119,7 @@ section>div[class*="row"]>div[class*="col-"] {
 }
 
 #intro h1 {
-	padding-top: 150px;
+	padding-top: 100px;
 }
 
 #intro {
