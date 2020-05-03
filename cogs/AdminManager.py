@@ -10,7 +10,7 @@ class AdminManager(commands.Cog, name="Administrator Management"):
 
     # ------------ SERVER MANAGEMENT ------------ #
 
-    @commands.command(name="setprefix")
+    @commands.command(name="setprefix", aliases=["prefix"])
     @commands.has_permissions(administrator=True)
     async def _setprefix(self, ctx, arg1):
         """Sets a custom prefix for the bot on the server."""

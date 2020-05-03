@@ -140,6 +140,11 @@ def getGodsGlobal():
     return query
 
 
+# Get number of Gods, globally
+def getGodsGlobalCount():
+    return gods.select().count()
+
+
 # Disband a God
 def disbandGod(godid):
     god = gods.select().where(gods.ID == godid)

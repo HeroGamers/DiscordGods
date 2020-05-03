@@ -1,0 +1,156 @@
+/* HeroGamers.xyz/WatchDog Stylesheet */
+/*           Fido2603@GitHub          */
+
+/* Fonts */
+@import url('https://fonts.googleapis.com/css?family=Lato|Raleway&display=swap');
+
+/* Main site stuff */
+html {
+	font-family: 'Raleway', serif;
+	position: relative;
+	min-height: 100%;
+}
+
+body {
+	margin-bottom: 60px; /* Margin bottom by footer height */
+	margin-top: 60px; /* Margin top by navbar height */
+	background-color: #222222;
+	color: azure;
+}
+
+h1 {
+	font-family: 'Raleway', serif;
+}
+
+h2, h3 {
+	font-family: 'Lato', serif;
+}
+
+a {
+	color:#ffffff;
+	text-decoration: none;
+}
+
+a:hover {
+	color:#ffffff;
+	text-decoration: none;
+}
+
+a:active {
+	color:#ffffff;
+}
+
+a:focus {
+	color:#ffffff;
+}
+
+button:focus {
+	outline: none;
+}
+
+/* Override bootstrap navbar button ugliness */
+.navbar-toggler:active {
+	background-color: #222222;
+}
+
+/* Give columns some space when they stack on smaller screens */
+@media (max-width: 767px) {
+	div.row div.col-md-6:first-child {
+		margin-bottom: 20px;
+	}
+}
+
+/* General about sections */
+section {
+	width: 100%;
+	height: 100%;
+	background-color: #23272A;
+	text-align: center;
+	padding: 10px 20px;
+	margin-top: 10px;
+}
+
+section>div[class*="row"]>div[class*="col-"] {
+	display: flex;
+	justify-content: center;
+	justify-items: center;
+	flex-direction: column;
+}
+
+.section-title {
+	margin-bottom: 10px;
+}
+
+/* Navbar */
+
+.navbar {
+	font-family: "Lato", serif;
+	background-color: #23272A;
+}
+
+.navbar-brand {
+	font-family: "Raleway", serif;
+}
+
+/* Sections */
+#intro div {
+	min-height: 60vh;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	-webkit-user-select: none; /* Safari */
+	-moz-user-select: none; /* Firefox */
+	-ms-user-select: none; /* IE10+/Edge */
+	user-select: none; /* Standard */
+}
+
+/* Move the text to the left on bigger devices, otherwise keep intro text in center */
+@media screen and (min-width: 1200px) {
+	#intro div {
+		align-items: flex-start;
+	}
+}
+
+#intro h1 {
+	padding-top: 150px;
+}
+
+#intro {
+	background-color: transparent;
+}
+
+/* Discord Button */
+.btn-blurple {
+	color: #fff;
+	background-color: #7289DA;
+	border-color: #343a40;
+}
+
+.btn-blurple:not(:disabled):not(.disabled):active {
+	color: #fff;
+	background-color: #5b6eae;
+	border-color: #171a1d;
+}
+
+.btn-blurple:hover {
+	color: #fff;
+	background-color: #677bc4;
+	border-color: #1d2124;
+}
+
+.btn-blurple:focus {
+	background-color: #7289DA;
+	border-color: #343a40;
+	box-shadow: none;
+}
+
+/* Colored links */
+.colored_link {
+	color: #2ba3ff;
+}
+
+.colored_link:hover, .colored_link:active, .colored_link:focus {
+	color: #51f5ff;
+}

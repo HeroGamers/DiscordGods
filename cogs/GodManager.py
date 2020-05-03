@@ -134,7 +134,7 @@ class GodManager(commands.Cog, name="Religion Management"):
     @commands.command(name="settype", aliases=["typeset", "type"])
     @commands.check(utilchecks.isPriest)
     async def _settype(self, ctx, arg1):
-        """Set the type of your God to something else!"""
+        """Set the type of your God to something else."""
         god = database.getBeliever(ctx.author.id, ctx.guild.id).God
         if god:
             godtypes = []
@@ -158,7 +158,7 @@ class GodManager(commands.Cog, name="Religion Management"):
     @commands.command(name="setgender", aliases=["genderset", "gender"])
     @commands.check(utilchecks.isPriest)
     async def _setgender(self, ctx, arg1):
-        """Set the gender of your God to something else!"""
+        """Set the gender of your God to something else."""
         god = database.getBeliever(ctx.author.id, ctx.guild.id).God
         if god:
             if len(arg1) > 19:

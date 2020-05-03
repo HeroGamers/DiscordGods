@@ -1,5 +1,7 @@
 import discord
 from discord.ext import commands
+
+import database
 from Util import logger
 
 
@@ -34,6 +36,8 @@ class BotManager(commands.Cog, name="Bot Commands"):
                         value="%s" % discord.utils.snowflake_time(ctx.bot.user.id).strftime(
                             "%Y-%m-%d %H:%M:%S"), inline=True)
         embed.add_field(name="Guilds", value="%s" % len(self.bot.guilds), inline=True)
+        embed.add_field(name="Gods", value="%s" % str(database.getGodsGlobalCount()), inline=True)
+        embed.add_field(name="Believers", value="%s" % str(database.getBelieversGlobalCount()), inline=True)
         embed.set_footer(text="%s" % ctx.author.name,
                          icon_url=ctx.author.avatar_url)
         await ctx.send(embed=embed)

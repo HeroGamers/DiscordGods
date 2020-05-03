@@ -30,6 +30,7 @@ class Tasks(commands.Cog, name="Tasks"):
 
     @tasks.loop(minutes=30.0)
     async def doPresenceUpdate(self):
+        await logger.log("Updating presence...", self.bot, "DEBUG")
         try:
             await self.bot.change_presence(activity=discord.Game(name="with " + str(database.getBelieversGlobalCount())
                                                                       + " believers | " + os.getenv('prefix')
