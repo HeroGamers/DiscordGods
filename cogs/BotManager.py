@@ -1,14 +1,88 @@
 import discord
 from discord.ext import commands
-
 import database
 from Util import logger
+from Util.botutils import botutils
 
 
 class BotManager(commands.Cog, name="Bot Commands"):
     def __init__(self, bot):
         """Where is the source code? How can I invite the bot? All these questions have their answers right here."""
         self.bot = bot
+
+    @commands.command(name="howto", aliases=["helpme"])
+    async def _howto(self, ctx, *args):
+        """Get help on how to use Gods."""
+        prefix = botutils.getPrefix(ctx.guild.id)
+        if not args:
+            await ctx.send("```\n"
+                           "So... You want to start a new religion. Or, maybe you want to join an already existing "
+                           "religion? Wait... oh, you are already experienced in the ways of Gods? Well, there are "
+                           "categories to further expand your knowledge around this mess of commands!\n"
+                           "\n"
+                           "  <> = required argument. [] = optional argument.\n"
+                           "\n"
+                           "> Creating a new religion:\n"
+                           "    " + prefix + "create <godName> [gender]   "
+                                             "Create a new religion. Gender is optional.\n"
+                           "> Joining an already created religion:\n"
+                           "    " + prefix + "join <godName>              "
+                                             "Joins a religion.\n"
+                           "> Praying to your God:\n"
+                           "    " + prefix + "pray                        "
+                                             "Prays to a God, raising it's Power and Mood, and gaining Prayer Power.\n"
+                           "\n"
+                           "For more specialized help, use '" + prefix + "howto [category]'.\n"
+                           "Categories:\n"
+                           "  Management                          "
+                           "Gets help about managing a God. Directed towards Priests.\n"
+                           "  Misc                                "
+                           "Miscellaneous things like marriage and hugs.\n"
+                           "```")
+        else:
+            if args[0].lower() == "management":
+                await ctx.send("```\n"
+                               "Phew, the management of religions. These commands are for Priests only.\n"
+                               "\n"
+                               "  <> = required argument. [] = optional argument.\n"
+                               "\n"
+                               "> Set your religion to invite-only:\n"
+                               "    " + prefix + "access                      "
+                                                 "Set your religion as open or invite only.\n"
+                               "> Change the description of your religion:\n"
+                               "    " + prefix + "description <desc>          "
+                                                 "Sets a description.\n"
+                               "> Invite someone to your religion:\n"
+                               "    " + prefix + "invite <mention or ID>      "
+                                                 "Invites said user to your religion.\n"
+                               "> Set the gender of your God:\n"
+                               "    " + prefix + "setgender <gender>          "
+                                                 "Changes the gender of your God. Examples include female and "
+                                                 "sexless.\n"
+                               "> Set the type of your God:\n"
+                               "    " + prefix + "settype <type>              "
+                                                 "Example types include Love, War and Thunder.\n"
+                               "```")
+            elif (args[0].lower() == "misc") or (args[0].lower() == "miscellaneous"):
+                await ctx.send("```\n"
+                               "So, you wanna get married, huh?\n"
+                               "\n"
+                               "  <> = required argument. [] = optional argument.\n"
+                               "\n"
+                               "> Marrying someone:\n"
+                               "    " + prefix + "marry <mention or ID>       "
+                                                 "Proposes to marry someone. The person you marry must believe in the "
+                                                 "same religion as you.\n"
+                               "> Loving/kissing your lover:\n"
+                               "    " + prefix + "love                        "
+                                                 "Kisses your special someone, bringing you to the top of the"
+                                                 "marriage list. This costs no Prayer Power.\n"
+                               "> Hug someone:\n"
+                               "    " + prefix + "hug <mention or ID>         "
+                                                 "Hugs someone - Costs 0.5 Prayer Power.\n"
+                               "```")
+            else:
+                await ctx.send("Category not found!")
 
     @commands.command(name="source", aliases=["code", "sourcecode"])
     async def _source(self, ctx):

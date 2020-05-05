@@ -15,7 +15,7 @@ def setup_logger():
     handler.setFormatter(formatter)
     screen_handler = logging.StreamHandler(stream=sys.stdout)
     screen_handler.setFormatter(formatter)
-    logger = logging.getLogger("watchdog")
+    logger = logging.getLogger("gods")
     logger.addHandler(handler)
     logger.addHandler(screen_handler)
     logger.setLevel(logging.DEBUG)
@@ -50,7 +50,7 @@ def logDebug(message, level="INFO"):
     if (os.getenv('debugEnabled') == "False") and (level == "DEBUG"):
         return
 
-    logger = logging.getLogger("watchdog")
+    logger = logging.getLogger("gods")
     if level == "DEBUG":
         logger.debug(message)
     elif level == "ERROR":

@@ -33,7 +33,7 @@ async def getPrefix(bot, message):
 
 
 bot = commands.Bot(command_prefix=getPrefix, description='Religion has never been easier!',
-                   activity=discord.Game(name="...starting up!"))
+                   activity=discord.Game(name="with religions | " + os.getenv('prefix') + "gods howto"))
 
 
 startup_extensions = ["BotManager",
@@ -84,6 +84,8 @@ async def on_command_error(ctx: commands.Context, error):
         return
     elif isinstance(error, commands.CommandNotFound):
         return
+    elif "User not found!" in str(error):
+        await ctx.send("Error: User not found! Try mentioning or using an ID!")
     else:
         await ctx.send("Something went wrong while executing that command... Sorry!")
         await logger.log("%s" % error, bot, "ERROR")

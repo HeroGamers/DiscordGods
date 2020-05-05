@@ -83,7 +83,7 @@ class botutils:
         guildconfig = database.getGuild(guildid)
 
         if not guildconfig:
-            return os.getenv("prefix")
+            return os.getenv("prefix")+"gods "
         else:
             return guildconfig.Prefix
 
@@ -184,8 +184,8 @@ class botutils:
                 try:
                     await dm_channel.send(
                         "Congratulations! You've been selected as the priest for **" + god.Name + "** on "
-                        "the " + guild.name + " server!\nWrite `"+prefix+"gods accept` to accept the "
-                        "request, or `"+prefix+"gods deny` to decline the request, on that server!")
+                        "the " + guild.name + " server!\nWrite `"+prefix+"accept` to accept the "
+                        "request, or `"+prefix+"deny` to decline the request, on that server!")
                 except Exception as e:
                     # if we can't send the DM, the user probably has DM's off, at which point we would uhhh, yes
                     await logger.log(
@@ -204,8 +204,8 @@ class botutils:
                         bot_permissions = channel.permissions_for(bot_member)
                         if user_permissions.send_messages & bot_permissions.send_messages:
                             await channel.send("<@" + str(user.id) + "> has been selected as the priest for **" +
-                                               god.Name + "**!\nWrite `"+prefix+"gods accept` to accept "
-                                               "the request, or `"+prefix+"gods deny` to decline "
+                                               god.Name + "**!\nWrite `" + prefix + "accept` to accept "
+                                               "the request, or `" + prefix + "deny` to decline "
                                                "the request!")
                             break
                 # Jump out of while loop
