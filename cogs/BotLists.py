@@ -14,6 +14,7 @@ class BotLists(commands.Cog):
         self.dbotsgg_token = os.getenv('discord.bots.gg_token')  # https://discord.bots.gg/
         self.discordbotlistcom_token = os.getenv('discordbotlist.com_token')  # https://discordbotlist.com/
         self.botsondiscordxyz_token = os.getenv('bots.ondiscord.xyz_token')  # https://bots.ondiscord.xyz/
+        self.botsfordiscordcom_token = os.getenv('botsfordiscord.com_token')  # https://botsfordiscord.com/
 
         self.topgg = dbl.DBLClient(self.bot, self.topgg_token)  # top.gg
 
@@ -60,6 +61,25 @@ class BotLists(commands.Cog):
                    'Content-Type': "application/json"}
         payload = {'guildCount': guilds}
         url = "https://discordbotlist.com/bot-api/bots/" + botid + "/guilds"
+        resp = requests.post(url=url, headers=headers, data=json.dumps(payload))
+        logger.logDebug("Response from " + site + ": " + str(resp), "INFO")
+
+        # discordbotlist.com
+        site = "discordbotlist.com"
+        headers = {'Authorization': "Bot " + self.discordbotlistcom_token,
+                   'Content-Type': "application/json"}
+        payload = {'guilds': guilds,
+                   'users': users}
+        url = "https://discordbotlist.com/api/bots/" + botid + "/stats"
+        resp = requests.post(url=url, headers=headers, data=json.dumps(payload))
+        logger.logDebug("Response from " + site + ": " + str(resp), "INFO")
+
+        # botsfordiscord.com
+        site = "botsfordiscord.com"
+        headers = {'Authorization': self.botsfordiscordcom_token,
+                   'Content-Type': "application/json"}
+        payload = {'server_count': guilds}
+        url = "https://botsfordiscord.com/api/bot/" + botid
         resp = requests.post(url=url, headers=headers, data=json.dumps(payload))
         logger.logDebug("Response from " + site + ": " + str(resp), "INFO")
 
