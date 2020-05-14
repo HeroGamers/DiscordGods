@@ -74,7 +74,6 @@ class Info(commands.Cog, name="Information"):
             return
 
         gods = list(gods)
-        gods.reverse()
 
         i = 1
         godlist = ""
@@ -108,7 +107,6 @@ class Info(commands.Cog, name="Information"):
             return
 
         gods = list(gods)
-        gods.reverse()
 
         i = 1
         godlist = ""
@@ -150,7 +148,6 @@ class Info(commands.Cog, name="Information"):
             return
 
         marriages = list(marriages)
-        marriages.reverse()
 
         i = 1
         marriagelist = ""
@@ -184,7 +181,6 @@ class Info(commands.Cog, name="Information"):
             return
 
         marriages = list(marriages)
-        marriages.reverse()
 
         i = 1
         marriagelist = ""

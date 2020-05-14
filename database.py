@@ -130,13 +130,13 @@ def getGod(godid):
 
 # Gets all Gods in a guild
 def getGods(guildid):
-    query = gods.select().where(gods.Guild == str(guildid)).order_by(gods.Power)
+    query = gods.select().where(gods.Guild == str(guildid)).order_by(gods.Power.desc())
     return query
 
 
 # Gets top 50 Gods globally
 def getGodsGlobal():
-    query = gods.select().order_by(gods.Power).limit(50)
+    query = gods.select().order_by(gods.Power.desc()).limit(50)
     return query
 
 
@@ -342,13 +342,13 @@ def newMarriage(believer1, believer2, god):
 
 # Gets all Marriages in a guild
 def getMarriages(guild):
-    query = marriages.select().join(gods).where(gods.Guild == str(guild)).order_by(marriages.LoveDate)
+    query = marriages.select().join(gods).where(gods.Guild == str(guild)).order_by(marriages.LoveDate.desc())
     return query
 
 
 # Gets top 50 Marriages globally
 def getMarriagesGlobal():
-    query = marriages.select().order_by(marriages.LoveDate).limit(50)
+    query = marriages.select().order_by(marriages.LoveDate.desc()).limit(50)
     return query
 
 
