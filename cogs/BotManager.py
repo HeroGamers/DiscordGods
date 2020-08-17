@@ -112,6 +112,7 @@ class BotManager(commands.Cog, name="Bot Commands"):
         embed.add_field(name="Guilds", value="%s" % len(self.bot.guilds), inline=True)
         embed.add_field(name="Gods", value="%s" % str(database.getGodsGlobalCount()), inline=True)
         embed.add_field(name="Believers", value="%s" % str(database.getBelieversGlobalCount()), inline=True)
+        embed.add_field(name="Privacy Policy", value="For the Privacy Policy, please send a DM to HeroGamers through the support server!", inline=True)
         embed.set_footer(text="%s" % ctx.author.name,
                          icon_url=ctx.author.avatar_url)
         await ctx.send(embed=embed)
