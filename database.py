@@ -178,6 +178,12 @@ def setGender(godid, gender):
     query.execute()
 
 
+# Rename a God Added by mrSheploo
+def rename(godid, godname):
+    query =gods.update(Name=name).where(gods.ID == godid)
+    query.execute()
+    
+
 # Set a mood for a God
 def setMood(godid, mood):
     query = gods.update(Mood=mood).where(gods.ID == godid)
