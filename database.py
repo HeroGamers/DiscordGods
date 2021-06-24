@@ -176,12 +176,6 @@ def setType(godid, godtype):
 def setGender(godid, gender):
     query = gods.update(Gender=gender).where(gods.ID == godid)
     query.execute()
-
-
-# Rename a God Added by mrSheploo
-def rename(godid, godname):
-    query =gods.update(Name=name).where(gods.ID == godid)
-    query.execute()
     
 
 # Set a mood for a God
@@ -201,6 +195,11 @@ def toggleAccess(godid):
     query = gods.update(InviteOnly=access).where(gods.ID == godid)
     query.execute()
     return access
+
+# Rename a God Added by mrSheploo
+def rename(godid, godname):
+    query =gods.update(Name=name).where(gods.ID == godid)
+    query.execute()
 
 
 # Subtract mood and power on all Gods

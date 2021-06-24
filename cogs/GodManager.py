@@ -168,6 +168,15 @@ class GodManager(commands.Cog, name="Religion Management"):
             database.setGender(god.ID, arg1)
             await ctx.send("Gender successfully set to: " + arg1 + "!")
 
+    @commands.command(name="rename", aliases=["rn"]) #My attempt to make a possibility to change god's name (mrSheploo)
+    @commands.check(utilchecks.isPriest)
+    async def _rename(self, ctx, arg1):
+        """Rename existing God."""
+        god = database.getBeliever(ctx.authos.id, ctx.guild.id).God
+        
+        database.rename(god.ID, arg1)
+        await. ctx.send("God's name successfully changed to: " + arg1 + "!")
+
 
 def setup(bot):
     bot.add_cog(GodManager(bot))

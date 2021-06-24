@@ -75,7 +75,13 @@ class botutils:
                 ("PARTY", discord.Color.magenta()),
                 ("WAR", discord.Color.dark_red()),
                 ("WISDOM", discord.Color.dark_purple()),
-                ("NATURE", discord.Color.green())]
+                ("NATURE", discord.Color.green()),
+                ("SACRIFICE", discord.Color.red()), #Added by mrSheploo
+                ("DEATH", discord.Color.dark_red()),
+                ("ART", discord.Color.magenta()),
+                ("BOULDER", discord.Color.orange())
+                ("UNIVERSE", discord.Color.light_grey())
+                ("DESTRUCTION", discord.Color.dark_grey())]
 
     # Function to get the currently used prefix
     @classmethod
@@ -124,6 +130,8 @@ class botutils:
                 god_title = "Diety"
             elif god.Gender.upper() == "Boeing AH-64 Apache".upper():
                 god_title = "Attack Helicopter"
+            elif god.Gender.upper() == "Machine".upper(): #added by mrSheploo
+                god_title = "Destroyer"
 
         return god_title
 
