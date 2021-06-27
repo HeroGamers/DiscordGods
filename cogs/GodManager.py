@@ -168,12 +168,19 @@ class GodManager(commands.Cog, name="Religion Management"):
             database.setGender(god.ID, arg1)
             await ctx.send("Gender successfully set to: " + arg1 + "!")
 
-    @commands.command(name="rename", aliases=["rn"]) #My attempt to make a possibility to change god's name (mrSheploo)
+    @commands.command(name="rename", aliases=["rn"])
     @commands.check(utilchecks.isPriest)
     async def _rename(self, ctx, arg1):
         """Rename existing God."""
-        god = database.getBeliever(ctx.authos.id, ctx.guild.id).God
-        
+        if database.getGodName(arg1, ctx.guild.id):
+            await ctx.send("A God with that name already exists!")
+            return
+
+        if len(args[0]) > 16:
+            await ctx.send("Please choose a name that's not longer than 16 characters!")
+            return
+
+        god = database.getBeliever(ctx.author.id, ctx.guild.id).God
         database.rename(god.ID, arg1)
         await. ctx.send("God's name successfully changed to: " + arg1 + "!")
 

@@ -196,9 +196,9 @@ def toggleAccess(godid):
     query.execute()
     return access
 
-# Rename a God Added by mrSheploo
-def rename(godid, godname):
-    query =gods.update(Name=name).where(gods.ID == godid)
+# Rename a God
+def rename(godid, newname):
+    query =gods.update(Name=newname).where(gods.ID == godid)
     query.execute()
 
 

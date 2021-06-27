@@ -144,14 +144,26 @@ class AdminManager(commands.Cog, name="Administrator Management"):
         else:
             await ctx.send("A god with that name doesn't exist!")
 
-    @commands.command(name="forcerename", aliases=["frn"]) #My attempt to make a possibility to change god's name (mrSheploo)
+    @commands.command(name="forcerename", aliases=["adminrename", "frn"])
     @commands.has_permissions(administrator=True)
-    async def _rename(self, ctx, arg1):
+    async def _forcerename(self, ctx, args*):
         """Rename existing God."""
-        god = database.getGodName(arg1, ctx.guild.id)
+        if len(args) < 2:
+            await ctx.send("Include both a name and new name!")
+            return
         
-        database.rename(god.ID, arg1)
-        await. ctx.send("God's name successfully changed to: " + arg1 + "!")
+        if database.getGodName(args[1], ctx.guild.id):
+            await ctx.send("A God with that name already exists!")
+            return
+
+        if len(args[0]) > 16:
+            await ctx.send("Please choose a name that's not longer than 16 characters!")
+            return
+        
+        god = database.getGodName(args[0], ctx.guild.id)
+        
+        database.rename(god.ID, args[1])
+        await. ctx.send("God's name successfully changed to: " + args[1] + "!")
 
 
 
