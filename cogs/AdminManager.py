@@ -156,7 +156,7 @@ class AdminManager(commands.Cog, name="Administrator Management"):
             await ctx.send("A God with that name already exists!")
             return
 
-        if len(args[0]) > 16:
+        if len(args[1]) > 16:
             await ctx.send("Please choose a name that's not longer than 16 characters!")
             return
         
