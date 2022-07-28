@@ -111,8 +111,9 @@ class GodManager(commands.Cog, name="Religion Management"):
                 return
 
             if not ctx.guild.get_member(user.id):
-                await ctx.send("The user is not in this server!")
-                return
+                if not (await ctx.guild.fetch_member(user.id)):
+                    await ctx.send("The user is not in this server!")
+                    return
 
             believer = database.getBeliever(user.id, ctx.guild.id)
             if believer:

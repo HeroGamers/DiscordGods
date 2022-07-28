@@ -117,7 +117,9 @@ class AdminManager(commands.Cog, name="Administrator Management"):
                 return
 
             if not ctx.guild.get_member(user.id):
-                await ctx.send("User is not in this server!")
+                if not (await ctx.guild.fetch_member(user.id)):
+                    await ctx.send("User is not in this server!")
+                    return
 
             believer = database.getBeliever(user.id, ctx.guild.id)
 

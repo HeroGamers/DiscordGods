@@ -80,7 +80,7 @@ class BelieverManager(commands.Cog, name="Believer"):
             invite = database.getInvite(ctx.author.id, god.ID)
             if not invite:
                 await ctx.send("That God is invite-only, and you don't have an invite...\n"
-                               "Try contacting the Preist of the God for an invite!")
+                               "Try contacting the Priest of the God for an invite!")
                 return
             database.deleteInvite(invite.ID)
 
