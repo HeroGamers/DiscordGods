@@ -1,35 +1,21 @@
-from discord.ext import commands
+from discord import app_commands
 import database
 from Util.botutils import botutils
+from bot import DiscordGods
 
 
-class AdminManager(commands.Cog, name="Administrator Management"):
+class AdminManager(app_commands.Group, name="Administrator Management"):
     def __init__(self, bot):
         """For Server Administrators to manage the Gods and how DiscordGods work on the server."""
+        super().__init__()
         self.bot = bot
 
     # ------------ SERVER MANAGEMENT ------------ #
 
-    @commands.command(name="setprefix", aliases=["prefix"])
-    @commands.has_permissions(administrator=True)
-    async def _setprefix(self, ctx, arg1):
-        """Sets a custom prefix for the bot on the server."""
-        if len(arg1) > 6:
-            await ctx.send("Keep the prefix under 6 chars, please.")
-            return
-
-        guildconfig = database.getGuild(ctx.guild.id)
-
-        if not guildconfig:
-            guildconfig = database.newGuild(ctx.guild.id)
-
-        database.setPrefix(guildconfig.ID, arg1)
-        await ctx.send("Prefix set successfully!")
-
     # ------------ GOD MANAGEMENT ------------ #
 
-    @commands.command(name="forcedescription", aliases=["forcedesc", "admindesc"])
-    @commands.has_permissions(administrator=True)
+    @app_commands.command(name="forcedescription")
+    @app_commands.has_permissions(administrator=True)
     async def _forcedescription(self, ctx, *args):
         """Forces a description for a religion."""
         if len(args) < 2:
