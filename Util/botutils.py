@@ -1,20 +1,24 @@
 import os
 import random
+from typing import Union
+
 import discord
+from discord.ext.commands import Context
+
 import database
 from Util import logger
 
 
 # ------------ COMMAND CHECKS ------------ #
 
-def isBeliever(ctx):
+def isBeliever(ctx: Context):
     believer = database.getBeliever(ctx.author.id, ctx.guild.id)
     if believer:
         return True
     return False
 
 
-def isPriest(ctx):
+def isPriest(ctx: Context):
     believer = database.getBeliever(ctx.author.id, ctx.guild.id)
     if believer:
         god = database.getGod(believer.God)
@@ -25,14 +29,14 @@ def isPriest(ctx):
     return False
 
 
-def isNotBeliever(ctx):
+def isNotBeliever(ctx: Context):
     believer = database.getBeliever(ctx.author.id, ctx.guild.id)
     if believer:
         return False
     return True
 
 
-def isMarried(ctx):
+def isMarried(ctx: Context):
     believer = database.getBeliever(ctx.author.id, ctx.guild.id)
     if believer:
         married = database.getMarriage(believer.ID)
@@ -42,7 +46,7 @@ def isMarried(ctx):
     return False
 
 
-def isNotMarried(ctx):
+def isNotMarried(ctx: Context):
     believer = database.getBeliever(ctx.author.id, ctx.guild.id)
     if believer:
         married = database.getMarriage(believer.ID)
@@ -52,7 +56,7 @@ def isNotMarried(ctx):
     return True
 
 
-def hasOffer(ctx):
+def hasOffer(ctx: Context):
     believer = database.getBeliever(ctx.author.id, ctx.guild.id)
     if believer:
         priestoffer = database.getPriestOffer(believer.God)
@@ -79,7 +83,7 @@ class botutils:
 
     # Function to get the currently used prefix
     @classmethod
-    def getPrefix(cls, guildid):
+    def getPrefix(cls, guildid: int):
         guildconfig = database.getGuild(guildid)
 
         if not guildconfig:
@@ -89,13 +93,23 @@ class botutils:
 
     # Function used to try and get users from arguments
     @classmethod
-    async def getUser(cls, bot, guild, arg):
+    async def getUser(cls, bot: discord.ext.commands.Bot, guild: discord.Guild, arg: str) -> Union[discord.User, discord.Member]:
         if arg.startswith("<@") and arg.endswith(">"):
             userid = arg.replace("<@", "").replace(">", "").replace("!", "")  # fuck you nicknames
         else:
             userid = arg
 
-        user = None
+        try:
+            userid = int(userid)
+        except Exception as e:
+            logger.logDebug(f"Could not parse arg into userid - {e}")
+            raise Exception("User not found!")
+
+        user: Union[discord.User, discord.Member] = bot.get_user(userid)
+        if user:
+            logger.logDebug("User found! - %s" % user.name)
+            return user
+
         try:
             user = await bot.fetch_user(userid)
         except Exception as e:

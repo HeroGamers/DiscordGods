@@ -1,9 +1,11 @@
+from typing import Optional, List
 import pymysql
 from peewee import SqliteDatabase, Model, CharField, DateTimeField, AutoField, ForeignKeyField, BooleanField, \
     IntegerField, BitField, FloatField, MySQLDatabase, InternalError
 import datetime
 import os
 from Util import logger
+from Util.botutils import botutils
 
 # This file mostly consists of different, quite identical, calls to the database, and as such functions look quite
 # alike. For this reason, the "issues" with duplicates are ignored from this file on Code Climate.
@@ -86,67 +88,51 @@ class gods(Model):
 
 
 # Adding new gods to the DB
-def newGod(guild, name, godtype, gender=None):
+def newGod(guild: int, name: str, godtype: botutils.godtypes, gender: Optional[str] = None) -> Optional[gods]:
     try:
         god = gods.create(Guild=guild, Name=name, Type=godtype, Gender=gender)
         return god
     except Exception as error:
         logger.logDebug("Error doing new marriage - " + str(error), "ERROR")
-        return False
-
-
-# Get a God's believers, using name and guild
-def getBelievers(godname, guild):
-    query = believers.select().join(gods).where((gods.Guild == str(guild)) & (gods.Name.contains(str(godname))))
-    if query.exists():
-        return query
-    return False
-
-
-# Get a God's believers, using ID
-def getBelieversByID(godid):
-    query = believers.select().join(gods).where(gods.ID == godid)
-    if query.exists():
-        return query
-    return False
+        return None
 
 
 # See if a god already exists with that name in a guild
-def getGodName(name, guild):
+def getGodName(name: str, guild: int) -> Optional[gods]:
     query = gods.select().where((gods.Guild == str(guild)) & gods.Name.contains(str(name)))
     if query.exists():
         god = query.execute()
         return god[0]
-    return False
+    return None
 
 
 # Get a God by ID
-def getGod(godid):
+def getGod(godid: int) -> Optional[gods]:
     query = gods.select().where(gods.ID == godid)
     if query.exists():
         return query[0]
-    return False
+    return None
 
 
 # Gets all Gods in a guild
-def getGods(guildid):
+def getGods(guildid: int) -> List[gods]:
     query = gods.select().where(gods.Guild == str(guildid)).order_by(gods.Power.desc())
     return query
 
 
 # Gets top 50 Gods globally
-def getGodsGlobal():
+def getGodsGlobal() -> List[gods]:
     query = gods.select().order_by(gods.Power.desc()).limit(50)
     return query
 
 
 # Get number of Gods, globally
-def getGodsGlobalCount():
+def getGodsGlobalCount() -> int:
     return gods.select().count()
 
 
 # Disband a God
-def disbandGod(godid):
+def disbandGod(godid: int) -> bool:
     god = gods.select().where(gods.ID == godid)
     query = god[0].delete_instance()
     if query == 1:
@@ -155,37 +141,37 @@ def disbandGod(godid):
 
 
 # Set a priest for a God
-def setPriest(godid, believerid):
+def setPriest(godid: int, believerid: int) -> None:
     query = gods.update(Priest=believerid).where(gods.ID == godid)
     query.execute()
 
 
 # Set a description for a God
-def setDesc(godid, desc):
+def setDesc(godid: int, desc: str) -> None:
     query = gods.update(Description=desc).where(gods.ID == godid)
     query.execute()
 
 
 # Set a type for a God
-def setType(godid, godtype):
+def setType(godid: int, godtype: botutils.godtypes) -> None:
     query = gods.update(Type=godtype).where(gods.ID == godid)
     query.execute()
 
 
 # Set a gender for a God
-def setGender(godid, gender):
+def setGender(godid: int, gender: str) -> None:
     query = gods.update(Gender=gender).where(gods.ID == godid)
     query.execute()
 
 
 # Set a mood for a God
-def setMood(godid, mood):
+def setMood(godid: int, mood: float) -> None:
     query = gods.update(Mood=mood).where(gods.ID == godid)
     query.execute()
 
 
 # Toggle access (inviteonly)
-def toggleAccess(godid):
+def toggleAccess(godid: int) -> bool:
     god = getGod(godid)
 
     access = True
@@ -198,7 +184,7 @@ def toggleAccess(godid):
 
 
 # Subtract mood and power on all Gods
-def doGodsFalloff(falloffMood, falloffPower):
+def doGodsFalloff(falloffMood: float, falloffPower: float) -> None:
     query = gods.update(Power=(gods.Power - falloffPower)).where(gods.Power > (0.0 + falloffPower))
     query.execute()
 
@@ -224,46 +210,46 @@ class believers(Model):
 
 
 # Adding new believers to the DB
-def newBeliever(userid, god):
+def newBeliever(userid: int, god: gods) -> Optional[believers]:
     try:
         believer = believers.create(UserID=userid, God=god)
         return believer
     except Exception as error:
         logger.logDebug("Error doing new believer - " + str(error), "ERROR")
-        return False
+        return None
 
 
 # Whether a believer already believes in a god on that guild, if yes, returns believer
-def getBeliever(userid, guild):
+def getBeliever(userid: int, guild: int) -> Optional[believers]:
     query = believers.select().join(gods).where(gods.Guild == str(guild)).where(believers.UserID == str(userid))
     if query.exists():
         return query[0]
-    return False
+    return None
 
 
 # Whether a believer already believes in a god on that guild, if yes, returns believer
-def getBelieverByID(believerID):
+def getBelieverByID(believerID: int) -> Optional[believers]:
     query = believers.select().where(believers.ID == believerID)
     if query.exists():
         return query[0]
-    return False
+    return None
 
 
 # Get top 50 believers, globally
-def getBelieversGlobal():
+def getBelieversGlobal() -> List[believers]:
     query = believers.select().sort(believers.PrayerPower).limit(50)
     if query.exists():
         return query
-    return False
+    return []
 
 
 # Get number of believers, globally
-def getBelieversGlobalCount():
+def getBelieversGlobalCount() -> int:
     return believers.select().count()
 
 
 # Leave a god
-def leaveGod(userid, guild):
+def leaveGod(userid: int, guild: int) -> bool:
     believer = getBeliever(userid, guild)
     query = believer.delete_instance()
     if query == 1:
@@ -272,7 +258,7 @@ def leaveGod(userid, guild):
 
 
 # Leave a god, by ID
-def leaveGodID(believerid):
+def leaveGodID(believerid: int) -> bool:
     believer = getBelieverByID(believerid)
     query = believer.delete_instance()
     if query == 1:
@@ -280,14 +266,29 @@ def leaveGodID(believerid):
     return False
 
 
+# Get a God's believers, using name and guild
+def getBelievers(godname: str, guild: int) -> List[believers]:
+    query = believers.select().join(gods).where((gods.Guild == str(guild)) & (gods.Name.contains(str(godname))))
+    if query.exists():
+        return query
+    return []
+
+
+# Get a God's believers, using ID
+def getBelieversByID(godid: int) -> List[believers]:
+    query = believers.select().join(gods).where(gods.ID == godid)
+    if query.exists():
+        return query
+    return []
+
 # Believer set to another god
-def setGod(believerid, godid):
+def setGod(believerid: int, godid: int) -> None:
     query = believers.update(God=godid).where(believers.ID == believerid)
     query.execute()
 
 
 # Prays
-def pray(believerInput):
+def pray(believerInput: believers) -> None:
     query = believers.update(PrayDate=datetime.datetime.now(), PrayerPower=(believerInput.PrayerPower + 1),
                              Prayers=str(int(believerInput.Prayers) + 1)).where(believers.ID == believerInput.ID)
     query.execute()
@@ -302,14 +303,14 @@ def pray(believerInput):
 
 
 # Subtract prayerpower on all believers
-def doBelieverFalloffs(falloffPrayerPower):
+def doBelieverFalloffs(falloffPrayerPower: float) -> None:
     query = believers.update(PrayerPower=(believers.PrayerPower - falloffPrayerPower)).where(believers.PrayerPower >
                                                                                              (0 + falloffPrayerPower))
     query.execute()
 
 
 # Subtract prayerpower from a believer
-def subtractPrayerPower(believerid, power):
+def subtractPrayerPower(believerid: int, power: float) -> None:
     query = believers.update(PrayerPower=(believers.PrayerPower - power)).where(believers.ID == believerid)
     query.execute()
 
@@ -331,37 +332,37 @@ class marriages(Model):
 
 
 # Adding new marriages to the DB
-def newMarriage(believer1, believer2, god):
+def newMarriage(believer1: believers, believer2: believers, god: gods) -> Optional[marriages]:
     try:
         marriage = marriages.create(God=god, Believer1=believer1, Believer2=believer2)
         return marriage
     except Exception as error:
         logger.logDebug("Error doing new marriage - " + str(error), "ERROR")
-        return False
+        return None
 
 
 # Gets all Marriages in a guild
-def getMarriages(guild):
+def getMarriages(guild: int) -> List[marriages]:
     query = marriages.select().join(gods).where(gods.Guild == str(guild)).order_by(marriages.LoveDate.desc())
     return query
 
 
 # Gets top 50 Marriages globally
-def getMarriagesGlobal():
+def getMarriagesGlobal() -> List[marriages]:
     query = marriages.select().order_by(marriages.LoveDate.desc()).limit(50)
     return query
 
 
 # Get someone's marriage
-def getMarriage(believerid):
+def getMarriage(believerid: int) -> Optional[marriages]:
     query = marriages.select().where((marriages.Believer1 == believerid) | (marriages.Believer2 == believerid))
     if query.exists():
         return query[0]
-    return False
+    return None
 
 
 # Delete a marriage
-def deleteMarriage(marriageid):
+def deleteMarriage(marriageid: int) -> bool:
     marriage = marriages.select().where(marriages.ID == marriageid)
     if marriage.exists():
         query = marriage[0].delete_instance()
@@ -371,7 +372,7 @@ def deleteMarriage(marriageid):
 
 
 # Show someone love
-def doLove(marriageid):
+def doLove(marriageid: int) -> None:
     date = datetime.datetime.now()
 
     query = marriages.update(LoveDate=date).where(marriages.ID == marriageid)
@@ -394,32 +395,32 @@ class offers(Model):
 
 
 # Adding new invite to the DB
-def newInvite(godid, userid):
+def newInvite(godid: int, userid: int) -> Optional[offers]:
     try:
         invite = offers.create(God=godid, Type=1, UserID=userid)
         return invite
     except Exception as error:
         logger.logDebug("Error doing new invite - " + str(error), "ERROR")
-        return False
+        return None
 
 
 # Get someone's invite for a god
-def getInvite(userid, godid):
+def getInvite(userid: int, godid: int) -> Optional[offers]:
     query = offers.select().where((offers.Type == 1) & (offers.UserID == str(userid)) & (offers.God == godid))
     if query.exists():
         return query[0]
-    return False
+    return None
 
 
 # Clears expired invites
-def clearExpiredInvites():
+def clearExpiredInvites() -> None:
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     query = offers.delete().where((offers.Type == 1) & (offers.CreationDate < today))
     query.execute()
 
 
 # Delete an invite // used after an invite has been used
-def deleteInvite(offerid):
+def deleteInvite(offerid: int) -> bool:
     invite = offers.select().where((offers.Type == 1) & (offers.ID == offerid))
     if invite.exists():
         query = invite[0].delete_instance()
@@ -429,25 +430,25 @@ def deleteInvite(offerid):
 
 
 # Adding new priest offer to the DB
-def newPriestOffer(godid, userid):
+def newPriestOffer(godid: int, userid: int) -> Optional[offers]:
     try:
         priestoffer = offers.create(God=godid, Type=2, UserID=userid)
         return priestoffer
     except Exception as error:
         logger.logDebug("Error doing new priestoffer - " + str(error), "ERROR")
-        return False
+        return None
 
 
 # Get someone's priest offer for a god
-def getPriestOffer(godid):
+def getPriestOffer(godid: int) -> Optional[offers]:
     query = offers.select().where((offers.Type == 2) & (offers.God == godid))
     if query.exists():
         return query[0]
-    return False
+    return None
 
 
 # Delete a priest offer // used after a priest offer has been used
-def deletePriestOffer(offerid):
+def deletePriestOffer(offerid: int) -> bool:
     priestoffer = offers.select().where((offers.Type == 2) & (offers.ID == offerid))
     if priestoffer.exists():
         query = priestoffer[0].delete_instance()
@@ -457,7 +458,7 @@ def deletePriestOffer(offerid):
 
 
 # Get and clear old priest offers
-def clearOldPriestOffers():
+def clearOldPriestOffers() -> bool:
     date = datetime.datetime.today() - datetime.timedelta(days=1)
     priestoffers = offers.select().where((offers.Type == 2) & (offers.CreationDate < date))
     if priestoffers.exists():
@@ -483,25 +484,25 @@ class guilds(Model):
 
 
 # Adding new guild to the DB
-def newGuild(guildid):
+def newGuild(guildid: int) -> Optional[guilds]:
     try:
         guild = guilds.create(Guild=guildid)
         return guild
     except Exception as error:
         logger.logDebug("Error doing new guild - " + str(error), "ERROR")
-        return False
+        return None
 
 
 # Get a guild from the DB
-def getGuild(guildid):
+def getGuild(guildid: int) -> Optional[guilds]:
     query = guilds.select().where(guilds.Guild == str(guildid))
     if query.exists():
         return query[0]
-    return False
+    return None
 
 
 # Set a prefix for a guild
-def setPrefix(guildconfigid, prefix):
+def setPrefix(guildconfigid: int, prefix: str) -> None:
     query = guilds.update(Prefix=prefix).where(guilds.ID == guildconfigid)
     query.execute()
 

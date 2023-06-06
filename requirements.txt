@@ -1,5 +1,5 @@
-discord.py==2.0.1
-peewee==3.15.4
-PyMySQL==1.0.2
+discord.py==2.2.3
+peewee==3.16.2
+PyMySQL==1.0.3
 dblpy==0.4.0
-requests==2.28.1
+requests==2.31.0

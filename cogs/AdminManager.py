@@ -1,3 +1,5 @@
+from discord.app_commands import commands
+from discord.ext.commands import Context
 from discord import app_commands
 import database
 from Util.botutils import botutils
@@ -16,7 +18,7 @@ class AdminManager(app_commands.Group, name="Administrator Management"):
 
     @app_commands.command(name="forcedescription")
     @app_commands.has_permissions(administrator=True)
-    async def _forcedescription(self, ctx, *args):
+    async def _forcedescription(self, ctx: Context, *args):
         """Forces a description for a religion."""
         if len(args) < 2:
             await ctx.send("Include both a name and a description!")
@@ -44,7 +46,7 @@ class AdminManager(app_commands.Group, name="Administrator Management"):
 
     @commands.command(name="forcesettype", aliases=["forcetypeset", "forcetype"])
     @commands.has_permissions(administrator=True)
-    async def _forcesettype(self, ctx, *args):
+    async def _forcesettype(self, ctx: Context, *args):
         """Set the type of a God to something else."""
         if len(args) < 2:
             await ctx.send("Include both a name and a type!")
@@ -72,7 +74,7 @@ class AdminManager(app_commands.Group, name="Administrator Management"):
 
     @commands.command(name="forcesetgender", aliases=["forcegenderset", "forcegender"])
     @commands.has_permissions(administrator=True)
-    async def _forcesetgender(self, ctx, *args):
+    async def _forcesetgender(self, ctx: Context, *args):
         """Set the gender of a God to something else."""
         if len(args) < 2:
             await ctx.send("Include both a name and a gender!")
@@ -89,7 +91,7 @@ class AdminManager(app_commands.Group, name="Administrator Management"):
 
     @commands.command(name="forcesetpriest", aliases=["forcepriest", "adminpriest"])
     @commands.has_permissions(administrator=True)
-    async def _forcesetpriest(self, ctx, *args):
+    async def _forcesetpriest(self, ctx: Context, *args):
         """Set the priest of a God."""
         if len(args) < 2:
             await ctx.send("Include both a name and a user.")
@@ -121,7 +123,7 @@ class AdminManager(app_commands.Group, name="Administrator Management"):
 
     @commands.command(name="forcedeletegod", aliases=["deletegod", "removegod", "forcedisbandgod"])
     @commands.has_permissions(administrator=True)
-    async def _forcedeletegod(self, ctx, arg1):
+    async def _forcedeletegod(self, ctx: Context, arg1):
         """Removes a religion from the server."""
         god = database.getGodName(arg1, ctx.guild.id)
         if god:

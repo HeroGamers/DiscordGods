@@ -1,5 +1,7 @@
 import random
 from discord.ext import commands
+from discord.ext.commands import Context
+
 import database
 from Util import logger
 from Util.botutils import botutils
@@ -15,7 +17,7 @@ class GodManager(commands.Cog, name="Religion Management"):
 
     @commands.command(name="create", aliases=["newgod"])
     @commands.check(utilchecks.isNotBeliever)
-    async def _create(self, ctx, *args):
+    async def _create(self, ctx: Context, *args):
         """Creates a new God."""
         user = ctx.author
 
@@ -53,7 +55,7 @@ class GodManager(commands.Cog, name="Religion Management"):
 
     @commands.command(name="access", aliases=["lock", "open"])
     @commands.check(utilchecks.isPriest)
-    async def _access(self, ctx):
+    async def _access(self, ctx: Context):
         """Set your religion as open or invite only."""
         god = database.getBeliever(ctx.author.id, ctx.guild.id).God
 
@@ -65,19 +67,19 @@ class GodManager(commands.Cog, name="Religion Management"):
 
     # @commands.command(name="ally", aliases=["friend"])
     # @commands.check(utilchecks.isPriest)
-    # async def _ally(self, ctx):
+    # async def _ally(self, ctx: Context):
     #     """Toggles alliance with another religion - Not done"""
     #     logger.logDebug("yes")
     #
     # @commands.command(name="war", aliases=["enemy"])
     # @commands.check(utilchecks.isPriest)
-    # async def _war(self, ctx):
+    # async def _war(self, ctx: Context):
     #     """Toggles war with another religion - Not done"""
     #     logger.logDebug("yes")
 
     @commands.command(name="description", aliases=["desc"])
     @commands.check(utilchecks.isPriest)
-    async def _description(self, ctx, *args):
+    async def _description(self, ctx: Context, *args):
         """Sets a description for your religion."""
         god = database.getBeliever(ctx.author.id, ctx.guild.id).God
 
@@ -96,7 +98,7 @@ class GodManager(commands.Cog, name="Religion Management"):
 
     @commands.command(name="invite", aliases=["inv"])
     @commands.check(utilchecks.isPriest)
-    async def _invite(self, ctx, arg1):
+    async def _invite(self, ctx: Context, arg1):
         """Invite someone to your religion."""
         god = database.getBeliever(ctx.author.id, ctx.guild.id).God
         if god:
@@ -134,7 +136,7 @@ class GodManager(commands.Cog, name="Religion Management"):
 
     @commands.command(name="settype", aliases=["typeset", "type"])
     @commands.check(utilchecks.isPriest)
-    async def _settype(self, ctx, arg1):
+    async def _settype(self, ctx: Context, arg1):
         """Set the type of your God to something else."""
         god = database.getBeliever(ctx.author.id, ctx.guild.id).God
         if god:
@@ -158,7 +160,7 @@ class GodManager(commands.Cog, name="Religion Management"):
 
     @commands.command(name="setgender", aliases=["genderset", "gender"])
     @commands.check(utilchecks.isPriest)
-    async def _setgender(self, ctx, arg1):
+    async def _setgender(self, ctx: Context, arg1):
         """Set the gender of your God to something else."""
         god = database.getBeliever(ctx.author.id, ctx.guild.id).God
         if god:

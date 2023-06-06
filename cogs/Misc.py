@@ -1,4 +1,5 @@
 import random
+from typing import Union
 
 import aiohttp
 import discord
@@ -6,6 +7,7 @@ from discord.ext import commands
 from Util.botutils import botutils
 import Util.botutils as utilchecks
 import database
+from discord import Embed, Color
 
 
 class Misc(commands.Cog, name="Miscellaneous"):
@@ -42,7 +44,7 @@ class Misc(commands.Cog, name="Miscellaneous"):
         self.bot = bot
 
     @commands.command(name="getcolor", aliases=["getColor", "getcolour", "getColour"], pass_context=True, no_pm=True)
-    async def _getcolor(self, ctx, hexcode: str):
+    async def _getcolor(self, ctx: commands.Context, hexcode: str):
         """Gets information about a color from its HEX code."""
         hexcode = hexcode.strip('#')
         url = "https://api.color.pizza/v1/{}".format(hexcode)
@@ -50,7 +52,7 @@ class Misc(commands.Cog, name="Miscellaneous"):
             async with session.get(url) as resp:
                 data = await resp.json()
         hexapi = 'http://www.htmlcsscolor.com/preview/gallery/{}.png'.format(data["colors"][0]["hex"].strip('#'))
-        em = discord.Embed(color=int('0x' + hexcode, 16))
+        em = Embed(color=int('0x' + hexcode, 16))
         em.set_image(url=hexapi)
         em.add_field(name='Name:', value=data["colors"][0]["name"], inline=True)
         em.add_field(name='Hex:', value=data["colors"][0]["hex"].upper(), inline=True)
@@ -64,16 +66,16 @@ class Misc(commands.Cog, name="Miscellaneous"):
         await ctx.send(embed=em)
 
     @classmethod
-    def getMiscEmbed(cls, believer, user, target, action):
+    def getMiscEmbed(cls, believer, user: Union[discord.User, discord.Member], target, action):
         god = believer.God
-        embedcolor = discord.Color.dark_gold()
+        embedcolor = Color.dark_gold()
         if god.Type:
             for godtype, color in botutils.godtypes:
                 if godtype == god.Type:
                     embedcolor = color
 
         # Create embed
-        embed = discord.Embed(color=embedcolor)
+        embed = Embed(color=embedcolor)
 
         # Get action line
         if "hug" in action.lower():
@@ -93,7 +95,7 @@ class Misc(commands.Cog, name="Miscellaneous"):
 
     @commands.command(name="hug")
     @commands.check(utilchecks.isBeliever)
-    async def _hug(self, ctx, arg1):
+    async def _hug(self, ctx: commands.Context, arg1):
         """Hugs someone, awhh - 0.5 Prayer Power."""
         believer = database.getBeliever(ctx.author.id, ctx.guild.id)
         if believer.PrayerPower < 0.5:
@@ -114,7 +116,7 @@ class Misc(commands.Cog, name="Miscellaneous"):
 
     @commands.command(name="love", aliases=["kiss"])
     @commands.check(utilchecks.isMarried)
-    async def _love(self, ctx):
+    async def _love(self, ctx: commands.Context):
         """Shows your special someone that you love them - Free."""
         believer = database.getBeliever(ctx.author.id, ctx.guild.id)
         marriage = database.getMarriage(believer.ID)

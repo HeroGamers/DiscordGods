@@ -1,4 +1,6 @@
 # Import the config
+import asyncio
+
 try:
     import config
 except ImportError:
@@ -28,6 +30,20 @@ class DiscordGods(discord.ext.commands.Bot):
         super().__init__(command_prefix=command_prefix, intents=intents, options=options)
 
     async def setup_hook(self):
+        bot.remove_command("help")
+        # Load commands
+        for command_group in command_groups:
+            try:
+                bot.tree.add_command(command_group)
+            except Exception as e:
+                logger.logDebug(f"Failed to load command group {command_group}. - {e}", "ERROR")
+        # Load tasks
+        for task in tasks:
+            try:
+                await bot.load_extension(f"{task}")
+            except Exception as e:
+                logger.logDebug(f"Failed to load task {task}. - {e}", "ERROR")
+
         # TODO: change from test guild commands to global commands
         self.tree.copy_global_to(guild=TEST_GUILD)
         await self.tree.sync(guild=TEST_GUILD)
@@ -129,21 +145,12 @@ tasks = [
     cogs.Tasks.Tasks(bot)
 ]
 
-if __name__ == '__main__':
-    logger.setup_logger()
-    
-    bot.remove_command("help")
-    # Load commands
-    for command_group in command_groups:
-        try:
-            bot.tree.add_command(command_group)
-        except Exception as e:
-            logger.logDebug(f"Failed to load command group {command_group}. - {e}", "ERROR")
-    # Load tasks
-    for task in tasks:
-        try:
-            bot.load_extension(f"cogs.{task}")
-        except Exception as e:
-            logger.logDebug(f"Failed to load task {task}. - {e}", "ERROR")
 
-bot.run(os.getenv('token'))
+async def main():
+    logger.setup_logger()
+
+    async with bot:
+        await bot.start(os.getenv('token'))
+
+if __name__ == '__main__':
+    asyncio.run(main())

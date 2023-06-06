@@ -1,5 +1,7 @@
 import discord
 from discord.ext import commands
+from discord.ext.commands import Context
+
 import database
 from Util import logger
 from Util.botutils import botutils
@@ -11,7 +13,7 @@ class BotManager(commands.Cog, name="Bot Commands"):
         self.bot = bot
 
     @commands.command(name="howto", aliases=["helpme"])
-    async def _howto(self, ctx, *args):
+    async def _howto(self, ctx: Context, *args):
         """Get help on how to use Gods."""
         prefix = botutils.getPrefix(ctx.guild.id)
         if not args:
@@ -85,24 +87,24 @@ class BotManager(commands.Cog, name="Bot Commands"):
                 await ctx.send("Category not found!")
 
     @commands.command(name="source", aliases=["code", "sourcecode"])
-    async def _source(self, ctx):
+    async def _source(self, ctx: Context):
         """View and/or help with the source code of Gods."""
         await ctx.send("The source code for Gods can be found here: https://github.com/Fido2603/DiscordGods")
 
     @commands.command(name="support")
-    async def _support(self, ctx):
+    async def _support(self, ctx: Context):
         """Get help and support regarding the bot."""
         await ctx.send("The server where the Gods roam, Treeland: https://discord.gg/PvFPEfd")
 
     @commands.command(name="botinvite", aliases=["invitebot", "addbot"])
-    async def _botinvite(self, ctx):
+    async def _botinvite(self, ctx: Context):
         """How to invite the bot."""
         await ctx.send(
             "Invite me to your server with this link: "
             "<https://discordapp.com/oauth2/authorize?scope=bot&client_id=180405652605239296>")
 
     @commands.command(name="botinfo", aliases=["bot"])
-    async def _botinfo(self, ctx):
+    async def _botinfo(self, ctx: Context):
         """Retrives information about the bot."""
         embed = discord.Embed(title="Bot Information", color=discord.Color.green(),
                               description="")
@@ -119,7 +121,7 @@ class BotManager(commands.Cog, name="Bot Commands"):
 
     @commands.command(name="loadcog", aliases=["loadextension"])
     @commands.is_owner()
-    async def _loadcog(self, ctx, arg1):
+    async def _loadcog(self, ctx: Context, arg1):
         """Loads a cog."""
         bot = self.bot
         try:
@@ -132,7 +134,7 @@ class BotManager(commands.Cog, name="Bot Commands"):
 
     @commands.command(name="listcogs", aliases=["cogs"])
     @commands.is_owner()
-    async def _listcogs(self, ctx):
+    async def _listcogs(self, ctx: Context):
         """Lists all the cogs."""
         embed = discord.Embed(title="Cogs", color=discord.Color.green(),
                               description="`AdminManager, BelieverManager, BotLists, BotManager, GodManager, Info, "
@@ -142,7 +144,7 @@ class BotManager(commands.Cog, name="Bot Commands"):
 
     @commands.command(name="unloadcog", aliases=["unloadextension"])
     @commands.is_owner()
-    async def _unloadcog(self, ctx, arg1):
+    async def _unloadcog(self, ctx: Context, arg1):
         """Unloads a cog."""
         bot = self.bot
         try:

@@ -1,5 +1,7 @@
 import discord
 from discord.ext import commands
+from discord.ext.commands import Context
+
 import database
 from Util.botutils import botutils
 
@@ -12,7 +14,7 @@ class Info(commands.Cog, name="Information"):
     # ------------ INFORMATION ------------ #
 
     @commands.command(name="info", aliases=["godinfo", "i"])
-    async def _info(self, ctx, *args):
+    async def _info(self, ctx: Context, *args):
         """Gets information about a God."""
         if len(args) > 0:
             god = database.getGodName(args[0], ctx.guild.id)
@@ -66,7 +68,7 @@ class Info(commands.Cog, name="Information"):
         await ctx.send(embed=embed)
 
     @commands.command(name="list", aliases=["gods"])
-    async def _list(self, ctx):
+    async def _list(self, ctx: Context):
         """Lists the top Gods on the server."""
         gods = database.getGods(ctx.guild.id)
         if not gods:
@@ -99,7 +101,7 @@ class Info(commands.Cog, name="Information"):
                        "```pl\n" + godlist + "```")
 
     @commands.command(name="globallist", aliases=["globalgods", "glist", "ggods"])
-    async def _globallist(self, ctx):
+    async def _globallist(self, ctx: Context):
         """Lists the top Gods globally."""
         gods = database.getGodsGlobal()
         if not gods:
@@ -140,7 +142,7 @@ class Info(commands.Cog, name="Information"):
                        "```pl\n" + godlist + "```")
 
     @commands.command(name="marriages", aliases=["not_singles_like_you", "marrylist"])
-    async def _marriages(self, ctx):
+    async def _marriages(self, ctx: Context):
         """Lists the most loving married couples on the server."""
         marriages = database.getMarriages(ctx.guild.id)
         if not marriages:
@@ -173,7 +175,7 @@ class Info(commands.Cog, name="Information"):
                        "```pl\n" + marriagelist + "```")
 
     @commands.command(name="globalmarriages", aliases=["gmarriages", "globalmarrylist"])
-    async def _globalmarriages(self, ctx):
+    async def _globalmarriages(self, ctx: Context):
         """Lists the most loving married couples globally."""
         marriages = database.getMarriagesGlobal()
         if not marriages:
