@@ -42,9 +42,9 @@ class DiscordGods(discord.ext.commands.Bot):
             except Exception as e:
                 logger.logDebug(f"Failed to load task {task}. - {e}", "ERROR")
 
-        # TODO: change from test guild commands to global commands
-        self.tree.copy_global_to(guild=TEST_GUILD)
-        await self.tree.sync(guild=TEST_GUILD)
+        # self.tree.copy_global_to(guild=TEST_GUILD)
+        # await self.tree.sync(guild=TEST_GUILD)
+        await self.tree.sync()
 
 
 intents = discord.Intents.default()
