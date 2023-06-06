@@ -6,10 +6,10 @@ from discord.ext import commands
 from Util.botutils import botutils
 import Util.botutils as utilchecks
 import database
-from discord import Embed, Color
+from discord import Embed, Color, app_commands
 
 
-class Misc(commands.Cog, name="Miscellaneous"):
+class Misc(app_commands.Group, name="miscellaneous"):
     hug_lines = ["{user} hugs {target}! Awaaa~", "{user} hugs {target} tightly!"]
     kiss_lines = ["{user} loves {target}!", "{user} kisses {target}!", "{user} loves {target} so, so very much!"]
     hug_gifs = ["https://cdn.discordapp.com/attachments/473953130371874828/704725705098788874/hug1.gif",
@@ -40,10 +40,13 @@ class Misc(commands.Cog, name="Miscellaneous"):
 
     def __init__(self, bot: discord.ext.commands.Bot):
         """Fun commands - Some of them are free, others cost Prayer Power."""
+        super().__init__()
         self.bot = bot
 
-    @commands.command(name="getcolor", aliases=["getColor", "getcolour", "getColour"], pass_context=True, no_pm=True)
-    async def _getcolor(self, ctx: commands.Context, hexcode: str):
+    # I believe this was a command that my boyfriend made (shoutout to Isla), from their old bot, and forced me
+    # to add it
+    @app_commands.command(name="getcolor")
+    async def _getcolor(self, interaction: discord.Interaction, hexcode: str):
         """Gets information about a color from its HEX code."""
         hexcode = hexcode.strip('#')
         url = "https://api.color.pizza/v1/{}".format(hexcode)
@@ -62,16 +65,16 @@ class Misc(commands.Cog, name="Miscellaneous"):
         em.add_field(name='Requested Hex:', value=data["colors"][0]["requestedHex"].upper(), inline=True)
         em.set_footer(text='<== Original requested color; other color\'s values might be approximated',
                       icon_url="http://www.htmlcsscolor.com/preview/gallery/{}.png".format(data["colors"][0]["requestedHex"].strip('#')))
-        await ctx.send(embed=em)
+        await interaction.response.send_message(embed=em, ephemeral=True)
 
     @classmethod
     def getMiscEmbed(cls, believer, user: Union[discord.User, discord.Member], target: Union[discord.User, discord.Member], action: str):
         god = believer.God
         embedcolor = Color.dark_gold()
         if god.Type:
-            for godtype, color in botutils.godtypes:
-                if godtype == god.Type:
-                    embedcolor = color
+            for godtype in botutils.GodTypes:
+                if godtype.name == god.Type:
+                    embedcolor = godtype.getColor()
 
         # Create embed
         embed = Embed(color=embedcolor)
@@ -89,59 +92,57 @@ class Misc(commands.Cog, name="Miscellaneous"):
         else:
             action_line = "Error!"
 
-        embed.set_author(name=action_line, icon_url=user.avatar_url)
+        embed.set_author(name=action_line, icon_url=user.avatar)
         return embed
 
-    @commands.command(name="hug")
-    @commands.check(utilchecks.isBeliever)
-    async def _hug(self, ctx: commands.Context, arg1: str):
+    @app_commands.command(name="hug")
+    @app_commands.check(utilchecks.isBeliever)
+    async def _hug(self, interaction: discord.Interaction, user: discord.Member):
         """Hugs someone, awhh - 0.5 Prayer Power."""
-        believer = database.getBeliever(ctx.author.id, ctx.guild.id)
+        believer = database.getBeliever(interaction.user.id, interaction.guild.id)
         if believer.PrayerPower < 0.5:
-            await ctx.send("Your Prayer Power is below 0.5! Try praying again, and then try hugging!")
+            await interaction.response.send_message("Your Prayer Power is below 0.5! Try praying again, and then try hugging!", ephemeral=True)
             return
 
-        target = await botutils.getUser(self.bot, ctx.guild, arg1)
-        if target.id == ctx.author.id:
-            await ctx.send("You cannot hug yourself! Sad, we know...")
+        if user.id == interaction.user.id:
+            await interaction.response.send_message("You cannot hug yourself! Sad, we know...", ephemeral=True)
             return
-        if target.bot:
-            await ctx.send("Even though I think the bot appreciates your hugs, I don't think it would feel it...")
+        if user.bot:
+            await interaction.response.send_message("Even though I think the bot appreciates your hugs, I don't think it would feel it...", ephemeral=True)
             return
 
-        await ctx.send(embed=self.getMiscEmbed(believer, ctx.author, target, "HUGS"))
+        await interaction.response.send_message(embed=self.getMiscEmbed(believer, interaction.user, user, "HUGS"))
 
         database.subtractPrayerPower(believer.ID, 0.5)
 
-    @commands.command(name="love", aliases=["kiss"])
-    @commands.check(utilchecks.isMarried)
-    async def _love(self, ctx: commands.Context):
+    @app_commands.command(name="love")
+    @app_commands.check(utilchecks.isMarried)
+    async def _love(self, interaction: discord.Interaction):
         """Shows your special someone that you love them - Free."""
-        believer = database.getBeliever(ctx.author.id, ctx.guild.id)
+        believer = database.getBeliever(interaction.user.id, interaction.guild.id)
+        if not believer:
+            await interaction.response.send_message("You don't believe in any god.", ephemeral=True)
+            return
         marriage = database.getMarriage(believer.ID)
 
         if not marriage:
-            await ctx.send("You are not married, bozo!")
+            await interaction.response.send_message("You are not married, bozo!", ephemeral=True)
             return
 
         # Update LoveDate
         database.doLove(marriage.ID)
 
         # Send message
-        if marriage.Believer1.UserID == str(ctx.author.id):
+        if marriage.Believer1.UserID == str(interaction.user.id):
             loverid = marriage.Believer2.UserID
         else:
             loverid = marriage.Believer1.UserID
 
-        target = await botutils.getUser(self.bot, ctx.guild, loverid)
+        target = await botutils.getUser(self.bot, interaction.guild, loverid)
 
         if not target:
-            await ctx.send("Awwhh, lover not found...")
+            await interaction.response.send_message("Awwhh, lover not found...", ephemeral=True)
             return
 
-        # await ctx.send("<@" + loverid + "> - " + ctx.author.name + " loves you!")
-        await ctx.send(embed=self.getMiscEmbed(believer, ctx.author, target, "KISS"))
-
-
-def setup(bot: discord.ext.commands.Bot):
-    bot.add_cog(Misc(bot))
+        # await interaction.response.send_message("<@" + loverid + "> - " + interaction.user.name + " loves you!")
+        await interaction.response.send_message(embed=self.getMiscEmbed(believer, interaction.user, target, "KISS"))

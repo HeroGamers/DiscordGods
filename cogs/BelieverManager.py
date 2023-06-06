@@ -1,19 +1,18 @@
-import asyncio
 import datetime
 import random
 import discord
+from discord import app_commands
 from discord.ext import commands
-from discord.ext.commands import Context
-
 import database
 from Util import logger
-from Util.botutils import botutils
+from Util.botutils import botutils, MarriageConfirmUI
 from Util import botutils as utilchecks
 
 
-class BelieverManager(commands.Cog, name="Believer"):
+class BelieverManager(app_commands.Group, name="believer"):
     def __init__(self, bot: commands.Bot):
         """For all your believer needs! Join and leave religions, get married etc."""
+        super().__init__()
         self.bot = bot
         self.proposal_gifs = ["https://cdn.discordapp.com/attachments/473953130371874828/700359948646744154/propose1.gif",
                               "https://cdn.discordapp.com/attachments/473953130371874828/700359962530152498/propose2.gif",
@@ -35,18 +34,18 @@ class BelieverManager(commands.Cog, name="Believer"):
 
     # ------------ BELIEVER INTERACTIONS WITH A RELIGION/GOD ------------ #
 
-    @commands.command(name="leave", aliases=["yeet"])
-    @commands.check(utilchecks.isBeliever)
-    async def _leave(self, ctx: Context):
+    @app_commands.command(name="leave")
+    @app_commands.check(utilchecks.isBeliever)
+    async def _leave(self, interaction: discord.Interaction):
         """Leaves a religion."""
-        user = ctx.author
+        user = interaction.user
 
-        believer = database.getBeliever(ctx.author.id, ctx.guild.id)
+        believer = database.getBeliever(interaction.user.id, interaction.guild.id)
         if not believer:
             return
 
-        if database.leaveGod(user.id, ctx.guild.id):
-            await ctx.send("You've left your god!")
+        if database.leaveGod(user.id, interaction.guild.id):
+            await interaction.response.send_message("You've left your god!", ephemeral=True)
 
             # If there aren't any believers in the God anymore, disband it
             if not database.getBelieversByID(believer.God):
@@ -59,35 +58,35 @@ class BelieverManager(commands.Cog, name="Believer"):
             if marriage:
                 database.deleteMarriage(marriage.ID)
         else:
-            await ctx.send("Something went wrong...")
+            await interaction.response.send_message("Something went wrong...", ephemeral=True)
 
-    @commands.command(name="join", aliases=["enter"])
-    @commands.check(utilchecks.isNotBeliever)
-    async def _join(self, ctx: Context, arg1: str):
+    @app_commands.command(name="join")
+    @app_commands.check(utilchecks.isNotBeliever)
+    async def _join(self, interaction: discord.Interaction, name: str):
         """Joins a religion."""
-        believer = database.getBeliever(ctx.author.id, ctx.guild.id)
+        believer = database.getBeliever(interaction.user.id, interaction.guild.id)
         if believer:
-            if arg1.upper() == believer.God.Name.upper():
-                await ctx.send("You are already believing in this God!")
+            if name.upper() == believer.God.Name.upper():
+                await interaction.response.send_message("You are already believing in this God!", ephemeral=True)
                 return
-            await ctx.send("You are already in a God, please leave it to join a new one using `/gods leave`!")
+            await interaction.response.send_message("You are already in a God, please leave it to join a new one using `/gods leave`!", ephemeral=True)
             return
 
-        god = database.getGodName(arg1, ctx.guild.id)
+        god = database.getGodName(name, interaction.guild.id)
         if not god:
-            await ctx.send("There is no God by that name... yet! `/gods create <name>`")
+            await interaction.response.send_message("There is no God by that name... yet! `/gods create <name>`", ephemeral=True)
             return
 
         if god.InviteOnly:
-            invite = database.getInvite(ctx.author.id, god.ID)
+            invite = database.getInvite(interaction.user.id, god.ID)
             if not invite:
-                await ctx.send("That God is invite-only, and you don't have an invite...\n"
-                               "Try contacting the Priest of the God for an invite!")
+                await interaction.response.send_message("That God is invite-only, and you don't have an invite...\n"
+                               "Try contacting the Priest of the God for an invite!", ephemeral=True)
                 return
             database.deleteInvite(invite.ID)
 
-        database.newBeliever(ctx.author.id, god.ID)
-        await ctx.send("You've now become a believer in the name of " + god.Name + "!")
+        database.newBeliever(interaction.user.id, god.ID)
+        await interaction.response.send_message("You've now become a believer in the name of " + god.Name + "!", ephemeral=True)
 
         priestoffer = database.getPriestOffer(god.ID)
 
@@ -99,35 +98,43 @@ class BelieverManager(commands.Cog, name="Believer"):
         else:
             logger.logDebug("God already had a preist or a priest offer")
 
-    @commands.command(name="no", aliases=["deny", "decline", "reject"])
-    @commands.check(utilchecks.hasOffer)
-    async def _no(self, ctx: Context):
+    @app_commands.command(name="deny")
+    @app_commands.check(utilchecks.hasOffer)
+    async def _no(self, interaction: discord.Interaction):
         """Reject a proposal from your God."""
-        believer = database.getBeliever(ctx.author.id, ctx.guild.id)
+        believer = database.getBeliever(interaction.user.id, interaction.guild.id)
         priestoffer = database.getPriestOffer(believer.God.ID)
 
         database.deletePriestOffer(priestoffer.ID)
-        await ctx.send("You have rejected " + believer.God.Name + "'s request!")
+        await interaction.response.send_message("You have rejected " + believer.God.Name + "'s request!", ephemeral=True)
         await botutils.doNewPriestOffer(self.bot, priestoffer.God, priestoffer)
 
-    @commands.command(name="yes", aliases=["accept"])
-    @commands.check(utilchecks.hasOffer)
-    async def _yes(self, ctx: Context):
+    @app_commands.command(name="accept")
+    @app_commands.check(utilchecks.hasOffer)
+    async def _yes(self, interaction: discord.Interaction):
         """Accept a proposal from your God."""
-        believer = database.getBeliever(ctx.author.id, ctx.guild.id)
+        believer = database.getBeliever(interaction.user.id, interaction.guild.id)
+        if not believer:
+            await interaction.response.send_message("You don't believe in any god", ephemeral=True)
+            return
         priestoffer = database.getPriestOffer(believer.God.ID)
+        if not priestoffer:
+            await interaction.response.send_message("You don't have any offers", ephemeral=True)
+            return
 
         database.setPriest(believer.God.ID, believer.ID)
         database.deletePriestOffer(priestoffer.ID)
-        await ctx.send("You have accepted " + believer.God.Name + "'s request!\n" + ctx.author.name + " is now the "
+        await interaction.response.send_message("You have accepted " + believer.God.Name + "'s request!\n" + interaction.user.name + " is now the "
                        "Priest of " + believer.God.Name + "!")
 
-    @commands.command(name="pray", aliases=["p"])
-    @commands.check(utilchecks.isBeliever)
-    async def _pray(self, ctx: Context):
+    @app_commands.command(name="pray")
+    @app_commands.check(utilchecks.isBeliever)
+    async def _pray(self, interaction: discord.Interaction):
         """Pray to your God."""
-        believer = database.getBeliever(ctx.author.id, ctx.guild.id)
+        believer = database.getBeliever(interaction.user.id, interaction.guild.id)
         if not believer:
+            await interaction.response.send_message(
+                "You don't believe in any god!", ephemeral=True)
             return
 
         date = datetime.datetime.now()
@@ -138,47 +145,47 @@ class BelieverManager(commands.Cog, name="Believer"):
             database.pray(believer)
             believer = database.getBelieverByID(believer.ID)
 
-            await ctx.send("You prayed to your God! Your prayer power is now **" + str(round(believer.PrayerPower, 2))
-                           + "**!")
+            await interaction.response.send_message("You prayed to your God! Your prayer power is now **" + str(round(believer.PrayerPower, 2))
+                           + "**!", ephemeral=True)
         else:
             time_till_pray = 30-minutes
-            await ctx.send("You cannot pray to your " + botutils.getGodString(believer.God) + " yet! Time remaining: "
-                           + str(round(time_till_pray, 1)) + " minutes.")
+            await interaction.response.send_message("You cannot pray to your " + botutils.getGodString(believer.God) + " yet! Time remaining: "
+                           + str(round(time_till_pray, 1)) + " minutes.", ephemeral=True)
 
     # ------------ BELIEVER RELATIONSHIPS ------------ #
 
-    @commands.command(name="marry", aliases=["propose"])
-    @commands.check(utilchecks.isBeliever)
-    @commands.check(utilchecks.isNotMarried)
-    async def _marry(self, ctx: Context, arg1: str):
+    @app_commands.command(name="marry")
+    @app_commands.check(utilchecks.isBeliever)
+    @app_commands.check(utilchecks.isNotMarried)
+    async def _marry(self, interaction: discord.Interaction, special_someone: discord.Member):
         """Marry that special someone."""
-        guildid = ctx.guild.id
-        user1 = ctx.author
-        user2 = await botutils.getUser(self.bot, ctx.guild, arg1)
+        guildid = interaction.guild.id
+        user1 = interaction.user
+        user2 = special_someone
 
         believer1 = database.getBeliever(user1.id, guildid)
         believer2 = database.getBeliever(user2.id, guildid)
 
         if not believer1:
-            await ctx.send("You are not believing in any religion!")
+            await interaction.response.send_message("You are not believing in any religion!", ephemeral=True)
         elif database.getMarriage(believer1.ID):
-            await ctx.send("You are already married?! What are you trying to do?! - "
-                           "Maybe you should look at getting a divorce... `/g divorce`")
+            await interaction.response.send_message("You are already married?! What are you trying to do?! - "
+                           "Maybe you should look at getting a divorce... `/g divorce`", ephemeral=True)
         elif not believer2:
-            await ctx.send("Your special someone is not believing in any religion!")
+            await interaction.response.send_message("Your special someone is not believing in any religion!", ephemeral=True)
         elif database.getMarriage(believer2.ID):
-            await ctx.send("Aww... Your special someone is already married...")
+            await interaction.response.send_message("Aww... Your special someone is already married...", ephemeral=True)
         elif believer1.God != believer2.God:
-            await ctx.send("You are not believing in the same God as your special someone!")
+            await interaction.response.send_message("You are not believing in the same God as your special someone!", ephemeral=True)
         elif believer1 == believer2:
-            await ctx.send("You can't marry yourself, bozo!")
+            await interaction.response.send_message("You can't marry yourself, bozo!", ephemeral=True)
         else:
             god = believer1.God
             embedcolor = discord.Color.dark_gold()
             if god.Type:
-                for godtype, color in botutils.godtypes:
-                    if godtype == god.Type:
-                        embedcolor = color
+                for godtype in botutils.GodTypes:
+                    if godtype.name == god.Type:
+                        embedcolor = godtype.getColor()
 
             embed = discord.Embed(title="Marriage proposal", color=embedcolor,
                                   description="<@" + str(user2.id) + "> - " + user1.name + " wishes to marry you! "
@@ -186,62 +193,64 @@ class BelieverManager(commands.Cog, name="Believer"):
                                               "day forward, for better, for worse, for richer, for poorer, in sickness "
                                               "and in health, until death do you apart?")
             embed.set_image(url=random.choice(self.proposal_gifs))
-            embed.set_author(name=user1.name + " wishes to marry " + user2.name, icon_url=self.bot.user.avatar_url)
-            message = await ctx.send("<@" + str(user2.id) + ">", embed=embed)
-            await message.add_reaction('👍')
-            await message.add_reaction('👎')
+            embed.set_author(name=user1.name + " wishes to marry " + user2.name, icon_url=self.bot.user.avatar)
 
-            def check_for_react(reaction, user):
-                return user == user2 and reaction.message.id == message.id and (str(reaction.emoji) == '👍' or str(reaction.emoji) == '👎')
+            marriage_view = MarriageConfirmUI(user1, user2, random.choice(self.accept_gifs), random.choice(self.denial_gifs),
+                                              self.bot.user.avatar, believer1, believer2, embedcolor)
+            await interaction.response.send_message("<@" + str(user2.id) + ">", embed=embed, view=marriage_view)
 
-            try:
-                reaction, user = await self.bot.wait_for('reaction_add', timeout=60.0, check=check_for_react)
-            except asyncio.TimeoutError:
-                await ctx.send("Awh, too slow!")
-            else:
-                accepted = str(reaction.emoji) == '👍'
+            # logger.logDebug("Waiting for marriage request")
+            # if await marriage_view.wait():
+            #     logger.logDebug("timeout 1")
+            #     await interaction.response.edit_message(content="Awh, too slow!", embed=None)
+            #     return
+            #
+            # if marriage_view.value is None:
+            #     logger.logDebug("timeout 2")
+            #     await interaction.response.edit_message(content="Awh, too slow!", embed=None)
+            #     return
+            # elif marriage_view.value:
+            #     logger.logDebug("accepted")
+            #     embed = discord.Embed(title="Marriage proposal accepted!",
+            #                           color=embedcolor,
+            #                           description="<@" + str(user1.id) + "> and <@" + str(user2.id) +
+            #                                       "> are now married in the name of **" +
+            #                                       database.getGod(believer1.God).Name + "**!")
+            #     embed.set_author(name=user1.name + " proposed to marry " + user2.name,
+            #                      icon_url=self.bot.user.avatar)
+            #     database.newMarriage(believer1.ID, believer2.ID, believer1.God)
+            #     embed.set_image(url=random.choice(self.accept_gifs))
+            # else:
+            #     logger.logDebug("denied")
+            #     embed = discord.Embed(title="Marriage proposal denied!",
+            #                           color=embedcolor)
+            #     embed.set_author(name=user1.name + " proposed to marry " + user2.name,
+            #                      icon_url=self.bot.user.avatar)
+            #     embed.set_image(url=random.choice(self.denial_gifs))
+            # logger.logDebug("sending")
+            # await interaction.response.edit_message(content="", embed=embed)
 
-                accepted_desc = str("<@" + str(user1.id) + "> and <@" + str(user2.id) + "> are now married in the name "
-                                    "of **" + database.getGod(believer1.God).Name + "**!")
-                state_text = "accepted" if accepted else "denied"
-                embed = discord.Embed(title="Marriage proposal " + state_text + "!",
-                                      color=embedcolor, description=accepted_desc if accepted else None)
-                embed.set_author(name=user1.name + " proposed to marry " + user2.name,
-                                 icon_url=self.bot.user.avatar_url)
-
-                if accepted:
-                    database.newMarriage(believer1.ID, believer2.ID, believer1.God)
-                    embed.set_image(url=random.choice(self.accept_gifs))
-                else:
-                    embed.set_image(url=random.choice(self.denial_gifs))
-
-                await message.edit(content="", embed=embed)
-
-    @commands.command(name="divorce", aliases=["leave_with_the_kids"])
-    @commands.check(utilchecks.isMarried)
-    async def _divorce(self, ctx: Context):
+    @app_commands.command(name="divorce")
+    @app_commands.check(utilchecks.isMarried)
+    async def _divorce(self, interaction: discord.Interaction):
         """Leave your special someone and take the kids with you."""
-        believer = database.getBeliever(ctx.author.id, ctx.guild.id)
+        believer = database.getBeliever(interaction.user.id, interaction.guild.id)
         marriage = database.getMarriage(believer.ID)
 
         if not marriage:
-            await ctx.send("You are not married, bozo!")
+            await interaction.response.send_message("You are not married, bozo!", ephemeral=True)
             return
 
         # Get partner
-        if marriage.Believer1.UserID == str(ctx.author.id):
+        if marriage.Believer1.UserID == str(interaction.user.id):
             loverid = marriage.Believer2.UserID
         else:
             loverid = marriage.Believer1.UserID
 
         database.deleteMarriage(marriage.ID)
 
-        lover = await botutils.getUser(self.bot, ctx.guild, loverid)
+        lover = await botutils.getUser(self.bot, interaction.guild, loverid)
         if not lover:
-            await ctx.send("Your lover could not be found!\n*But don't worry, we got ya' divorced anyway!*")
+            await interaction.response.send_message("Your lover could not be found!\n*But don't worry, we got ya' divorced anyway!*", ephemeral=True)
         else:
-            await ctx.send(ctx.author.name + " just divorced " + lover.name + "!")
-
-
-def setup(bot: commands.Bot):
-    bot.add_cog(BelieverManager(bot))
+            await interaction.response.send_message(interaction.user.name + " just divorced " + lover.name + "!")

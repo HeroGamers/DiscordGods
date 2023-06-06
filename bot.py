@@ -9,8 +9,6 @@ import asyncio
 import discord
 from discord.ext.commands._types import BotT
 from Util import logger
-from Util.botutils import botutils
-import database
 import os
 from typing import Any
 import cogs
@@ -25,7 +23,7 @@ TEST_GUILD = discord.Object(id=473953130371874826)
 
 
 class DiscordGods(discord.ext.commands.Bot):
-    def __init__(self, command_prefix: discord.ext.commands.bot.PrefixType[BotT], *, intents: discord.Intents,
+    def __init__(self, command_prefix, *, intents: discord.Intents,
                  **options: Any) -> None:
         super().__init__(command_prefix=command_prefix, intents=intents, options=options)
 
@@ -40,7 +38,7 @@ class DiscordGods(discord.ext.commands.Bot):
         # Load tasks
         for task in tasks:
             try:
-                await bot.load_extension(f"{task}")
+                await bot.load_extension(f"cogs.{task}")
             except Exception as e:
                 logger.logDebug(f"Failed to load task {task}. - {e}", "ERROR")
 
@@ -107,13 +105,13 @@ async def on_guild_join(guild: discord.Guild):
 
 @bot.event
 async def on_guild_remove(guild: discord.Guild):
+    import database
     await logger.log("Left a new guild (`%s` - `%s`)" % (guild.name, guild.id), bot, "INFO")
 
-    # Disband any gods in the guild
-    gods = database.getGods(guild.id)
-    if gods:
-        for god in gods:
-            botutils.disbandGod(god.ID)
+    # Disband any gods in the guild (done by cascade)
+    db_guild = database.getGuild(guild.id)
+    if db_guild:
+        db_guild.delete_instance()
 
 
 # @bot.event
@@ -133,17 +131,17 @@ async def on_guild_remove(guild: discord.Guild):
 #         await bot.invoke(ctx)
 
 command_groups = [
-    cogs.BotManager.BotManager(bot),
-    cogs.GodManager.GodManager(bot),
-    cogs.BelieverManager.BelieverManager(bot),
-    cogs.Info.Info(bot),
-    cogs.Misc.Misc(bot),
-    cogs.AdminManager.AdminManager(bot)
+    cogs.BotManager(bot),
+    cogs.GodManager(bot),
+    cogs.BelieverManager(bot),
+    cogs.Info(bot),
+    cogs.Misc(bot),
+    cogs.AdminManager(bot)
 ]
 
 tasks = [
-    cogs.BotLists.BotLists(bot),
-    cogs.Tasks.Tasks(bot)
+    "BotLists",
+    "Tasks"
 ]
 
 

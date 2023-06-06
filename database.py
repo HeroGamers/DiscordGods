@@ -5,7 +5,6 @@ from peewee import SqliteDatabase, Model, CharField, DateTimeField, AutoField, F
 import datetime
 import os
 from Util import logger
-from Util.botutils import botutils
 
 # This file mostly consists of different, quite identical, calls to the database, and as such functions look quite
 # alike. For this reason, the "issues" with duplicates are ignored from this file on Code Climate.
@@ -88,7 +87,8 @@ class gods(Model):
 
 
 # Adding new gods to the DB
-def newGod(guild: int, name: str, godtype: botutils.godtypes, gender: Optional[str] = None) -> Optional[gods]:
+# Do not typehint godtype, causes circular import
+def newGod(guild: int, name: str, godtype: str, gender: Optional[str] = None) -> Optional[gods]:
     try:
         god = gods.create(Guild=guild, Name=name, Type=godtype, Gender=gender)
         return god
@@ -141,7 +141,7 @@ def disbandGod(godid: int) -> bool:
 
 
 # Set a priest for a God
-def setPriest(godid: int, believerid: int) -> None:
+def setPriest(godid: int, believerid: Optional[int]) -> None:
     query = gods.update(Priest=believerid).where(gods.ID == godid)
     query.execute()
 
@@ -153,7 +153,8 @@ def setDesc(godid: int, desc: str) -> None:
 
 
 # Set a type for a God
-def setType(godid: int, godtype: botutils.godtypes) -> None:
+# Do not typehint godtype, causes circular import
+def setType(godid: int, godtype: str) -> None:
     query = gods.update(Type=godtype).where(gods.ID == godid)
     query.execute()
 

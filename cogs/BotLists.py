@@ -16,9 +16,14 @@ class BotLists(commands.Cog):
         self.botsondiscordxyz_token = os.getenv('bots.ondiscord.xyz_token')  # https://bots.ondiscord.xyz/
         self.botsfordiscordcom_token = os.getenv('botsfordiscord.com_token')  # https://botsfordiscord.com/
 
-        self.topgg = dbl.DBLClient(self.bot, self.topgg_token)  # top.gg
+        self.topgg = None  # top.gg
 
+    async def cog_load(self):
+        self.topgg = dbl.DBLClient(self.bot, self.topgg_token)
         self.update_stats.start()
+
+    async def cog_unload(self) -> None:
+        self.update_stats.stop()
 
     @tasks.loop(minutes=30.0)
     async def update_stats(self):
@@ -88,5 +93,5 @@ class BotLists(commands.Cog):
         await self.bot.wait_until_ready()
 
 
-def setup(bot: commands.Bot):
-    bot.add_cog(BotLists(bot))
+async def setup(bot: commands.Bot):
+    await bot.add_cog(BotLists(bot))
