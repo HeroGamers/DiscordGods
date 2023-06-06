@@ -48,7 +48,7 @@ if os.getenv('db_type') is not None and os.getenv('db_type').upper() == "MYSQL":
                 print("Created Database!")
             except Exception as e:
                 print("An error occured while trying to create the gods Database: " + str(e) + ". Using flatfile...")
-                db = SqliteDatabase('./Gods.db')
+                db = SqliteDatabase('./Gods.db', pragmas={ 'foreign_keys': 1 })
     except InternalError as e:
         print("An error occured while trying to use the MySQL Database: " + str(e) + ". Mi...")
         db = SqliteDatabase('./Gods.db')
@@ -212,7 +212,7 @@ def doGodsFalloff(falloffMood, falloffPower):
 # The Believers Table
 class believers(Model):
     ID = AutoField()
-    God = ForeignKeyField(gods)
+    God = ForeignKeyField(gods, on_delete="CASCADE")
     UserID = CharField(max_length=snowflake_max_length)
     PrayerPower = FloatField(default=1)
     Prayers = CharField(max_length=5, default="0")
@@ -320,9 +320,9 @@ def subtractPrayerPower(believerid, power):
 # The Marriages Table
 class marriages(Model):
     ID = AutoField()
-    God = ForeignKeyField(gods)
-    Believer1 = ForeignKeyField(believers)
-    Believer2 = ForeignKeyField(believers)
+    God = ForeignKeyField(gods, on_delete="CASCADE")
+    Believer1 = ForeignKeyField(believers, on_delete="CASCADE")
+    Believer2 = ForeignKeyField(believers, on_delete="CASCADE")
     LoveDate = DateTimeField(default=datetime.datetime.now())
     MarriageDate = DateTimeField(default=datetime.datetime.now())
 
@@ -385,7 +385,7 @@ def doLove(marriageid):
 class offers(Model):
     ID = AutoField()
     Type = BitField()
-    God = ForeignKeyField(gods)
+    God = ForeignKeyField(gods, on_delete="CASCADE")
     UserID = CharField(max_length=snowflake_max_length)
     CreationDate = DateTimeField(default=datetime.datetime.now())
 
