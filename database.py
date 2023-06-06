@@ -48,7 +48,7 @@ if os.getenv('db_type') is not None and os.getenv('db_type').upper() == "MYSQL":
                 print("Created Database!")
             except Exception as e:
                 print("An error occured while trying to create the gods Database: " + str(e) + ". Using flatfile...")
-                db = SqliteDatabase('./Gods.db', pragmas={ 'foreign_keys': 1 })
+                db = SqliteDatabase('./Gods.db', pragmas={'foreign_keys': 1})
     except InternalError as e:
         print("An error occured while trying to use the MySQL Database: " + str(e) + ". Mi...")
         db = SqliteDatabase('./Gods.db')
@@ -288,16 +288,16 @@ def setGod(believerid, godid):
 
 # Prays
 def pray(believerInput):
-    query = believers.update(PrayDate=datetime.datetime.now(), PrayerPower=(believerInput.PrayerPower+1),
-                             Prayers=str(int(believerInput.Prayers)+1)).where(believers.ID == believerInput.ID)
+    query = believers.update(PrayDate=datetime.datetime.now(), PrayerPower=(believerInput.PrayerPower + 1),
+                             Prayers=str(int(believerInput.Prayers) + 1)).where(believers.ID == believerInput.ID)
     query.execute()
 
-    query = gods.update(Power=(believerInput.God.Power+1)).where(gods.ID == believerInput.God.ID)
+    query = gods.update(Power=(believerInput.God.Power + 1)).where(gods.ID == believerInput.God.ID)
     query.execute()
 
     moodraise = 10
-    query = gods.update(Mood=(believerInput.God.Mood+moodraise)).where((gods.ID == believerInput.God.ID) &
-                                                                       (gods.Mood < (100 - moodraise)))
+    query = gods.update(Mood=(believerInput.God.Mood + moodraise)).where((gods.ID == believerInput.God.ID) &
+                                                                         (gods.Mood < (100 - moodraise)))
     query.execute()
 
 

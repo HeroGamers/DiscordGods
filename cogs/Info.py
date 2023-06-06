@@ -57,9 +57,9 @@ class Info(commands.Cog, name="Information"):
         embed.add_field(name="Mood:", value=botutils.getGodMood(god.Mood), inline=True)
         embed.add_field(name="Invite Only:", value=god.InviteOnly, inline=True)
         if god.Priest:
-            priest = self.bot.get_user(int(database.getBelieverByID(god.Priest).UserID))
-            embed.set_footer(text="Priest: %s" % priest.name+"#"+priest.discriminator,
-                             icon_url=priest.avatar_url)
+            priest = await botutils.getUser(self.bot, ctx.guild, int(database.getBelieverByID(god.Priest).UserID))
+            if priest:
+                embed.set_footer(text="Priest: %s" % priest.name+"#"+priest.discriminator, icon_url=priest.avatar_url)
         else:
             embed.set_footer(text="This God has no priest yet!",
                              icon_url=self.bot.user.avatar_url)
