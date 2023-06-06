@@ -1,4 +1,6 @@
 import random
+
+import discord
 from discord.ext import commands
 from discord.ext.commands import Context
 
@@ -9,7 +11,7 @@ from Util import botutils as utilchecks
 
 
 class GodManager(commands.Cog, name="Religion Management"):
-    def __init__(self, bot):
+    def __init__(self, bot: discord.ext.commands.Bot):
         """Manage the religions, create new religions, and set their types as a priest."""
         self.bot = bot
 
@@ -98,7 +100,7 @@ class GodManager(commands.Cog, name="Religion Management"):
 
     @commands.command(name="invite", aliases=["inv"])
     @commands.check(utilchecks.isPriest)
-    async def _invite(self, ctx: Context, arg1):
+    async def _invite(self, ctx: Context, arg1: str):
         """Invite someone to your religion."""
         god = database.getBeliever(ctx.author.id, ctx.guild.id).God
         if god:
@@ -136,7 +138,7 @@ class GodManager(commands.Cog, name="Religion Management"):
 
     @commands.command(name="settype", aliases=["typeset", "type"])
     @commands.check(utilchecks.isPriest)
-    async def _settype(self, ctx: Context, arg1):
+    async def _settype(self, ctx: Context, arg1: str):
         """Set the type of your God to something else."""
         god = database.getBeliever(ctx.author.id, ctx.guild.id).God
         if god:
@@ -160,7 +162,7 @@ class GodManager(commands.Cog, name="Religion Management"):
 
     @commands.command(name="setgender", aliases=["genderset", "gender"])
     @commands.check(utilchecks.isPriest)
-    async def _setgender(self, ctx: Context, arg1):
+    async def _setgender(self, ctx: Context, arg1: str):
         """Set the gender of your God to something else."""
         god = database.getBeliever(ctx.author.id, ctx.guild.id).God
         if god:
@@ -172,5 +174,5 @@ class GodManager(commands.Cog, name="Religion Management"):
             await ctx.send("Gender successfully set to: " + arg1 + "!")
 
 
-def setup(bot):
+def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(GodManager(bot))

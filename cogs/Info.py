@@ -7,7 +7,7 @@ from Util.botutils import botutils
 
 
 class Info(commands.Cog, name="Information"):
-    def __init__(self, bot):
+    def __init__(self, bot: discord.ext.commands.Bot):
         """Get information about different religions, as well as Leaderboards, locally or globally."""
         self.bot = bot
 
@@ -214,5 +214,5 @@ class Info(commands.Cog, name="Information"):
                        "```pl\n" + marriagelist + "```")
 
 
-def setup(bot):
+def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(Info(bot))

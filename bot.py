@@ -1,12 +1,11 @@
 # Import the config
-import asyncio
-
 try:
     import config
 except ImportError:
     print("Couldn't import config.py! Exiting!")
     exit()
 
+import asyncio
 import discord
 from discord.ext.commands._types import BotT
 from Util import logger
@@ -26,7 +25,8 @@ TEST_GUILD = discord.Object(id=473953130371874826)
 
 
 class DiscordGods(discord.ext.commands.Bot):
-    def __init__(self, command_prefix: discord.ext.commands.bot.PrefixType[BotT], *, intents: discord.Intents, **options: Any) -> None:
+    def __init__(self, command_prefix: discord.ext.commands.bot.PrefixType[BotT], *, intents: discord.Intents,
+                 **options: Any) -> None:
         super().__init__(command_prefix=command_prefix, intents=intents, options=options)
 
     async def setup_hook(self):
@@ -50,8 +50,9 @@ class DiscordGods(discord.ext.commands.Bot):
 
 
 intents = discord.Intents.default()
-bot = DiscordGods(intents=intents, description='Religion has never been easier!', command_prefix=os.getenv("prefix"),
-                  activity=discord.Game(name="with religions | /gods howto"))
+bot: discord.ext.commands.Bot = DiscordGods(intents=intents, description='Religion has never been easier!',
+                                            command_prefix=os.getenv("prefix"),
+                                            activity=discord.Game(name="with religions | /gods howto"))
 
 
 @bot.event
@@ -100,12 +101,12 @@ async def on_ready():
 
 
 @bot.event
-async def on_guild_join(guild):
+async def on_guild_join(guild: discord.Guild):
     await logger.log("Joined a new guild (`%s` - `%s`)" % (guild.name, guild.id), bot, "INFO")
 
 
 @bot.event
-async def on_guild_remove(guild):
+async def on_guild_remove(guild: discord.Guild):
     await logger.log("Left a new guild (`%s` - `%s`)" % (guild.name, guild.id), bot, "INFO")
 
     # Disband any gods in the guild
@@ -151,6 +152,7 @@ async def main():
 
     async with bot:
         await bot.start(os.getenv('token'))
+
 
 if __name__ == '__main__':
     asyncio.run(main())

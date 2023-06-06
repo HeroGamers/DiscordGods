@@ -1,13 +1,13 @@
+import discord.ext.commands
 from discord.app_commands import commands
 from discord.ext.commands import Context
 from discord import app_commands
 import database
 from Util.botutils import botutils
-from bot import DiscordGods
 
 
 class AdminManager(app_commands.Group, name="Administrator Management"):
-    def __init__(self, bot):
+    def __init__(self, bot: discord.ext.commands.Bot):
         """For Server Administrators to manage the Gods and how DiscordGods work on the server."""
         super().__init__()
         self.bot = bot
@@ -135,5 +135,5 @@ class AdminManager(app_commands.Group, name="Administrator Management"):
             await ctx.send("A god with that name doesn't exist!")
 
 
-def setup(bot):
+def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(AdminManager(bot))

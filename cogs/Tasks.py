@@ -9,7 +9,7 @@ from Util.botutils import botutils
 
 
 class Tasks(commands.Cog, name="Tasks"):
-    def __init__(self, bot):
+    def __init__(self, bot: discord.ext.commands.Bot):
         """The Cog running the tasks in the background, like clearing old invites, changing the presence etc."""
         self.bot = bot
 
@@ -86,5 +86,5 @@ class Tasks(commands.Cog, name="Tasks"):
         await self.bot.wait_until_ready()
 
 
-def setup(bot):
+def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(Tasks(bot))

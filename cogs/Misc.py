@@ -1,6 +1,5 @@
 import random
 from typing import Union
-
 import aiohttp
 import discord
 from discord.ext import commands
@@ -39,7 +38,7 @@ class Misc(commands.Cog, name="Miscellaneous"):
                       "https://cdn.discordapp.com/attachments/473953130371874828/704727542342484098/kiss13.gif",
                       "https://cdn.discordapp.com/attachments/473953130371874828/704727515671035954/kiss14.gif"]
 
-    def __init__(self, bot):
+    def __init__(self, bot: discord.ext.commands.Bot):
         """Fun commands - Some of them are free, others cost Prayer Power."""
         self.bot = bot
 
@@ -66,7 +65,7 @@ class Misc(commands.Cog, name="Miscellaneous"):
         await ctx.send(embed=em)
 
     @classmethod
-    def getMiscEmbed(cls, believer, user: Union[discord.User, discord.Member], target, action):
+    def getMiscEmbed(cls, believer, user: Union[discord.User, discord.Member], target: Union[discord.User, discord.Member], action: str):
         god = believer.God
         embedcolor = Color.dark_gold()
         if god.Type:
@@ -95,7 +94,7 @@ class Misc(commands.Cog, name="Miscellaneous"):
 
     @commands.command(name="hug")
     @commands.check(utilchecks.isBeliever)
-    async def _hug(self, ctx: commands.Context, arg1):
+    async def _hug(self, ctx: commands.Context, arg1: str):
         """Hugs someone, awhh - 0.5 Prayer Power."""
         believer = database.getBeliever(ctx.author.id, ctx.guild.id)
         if believer.PrayerPower < 0.5:
@@ -144,5 +143,5 @@ class Misc(commands.Cog, name="Miscellaneous"):
         await ctx.send(embed=self.getMiscEmbed(believer, ctx.author, target, "KISS"))
 
 
-def setup(bot):
+def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(Misc(bot))

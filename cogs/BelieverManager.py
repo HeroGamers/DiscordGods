@@ -12,7 +12,7 @@ from Util import botutils as utilchecks
 
 
 class BelieverManager(commands.Cog, name="Believer"):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         """For all your believer needs! Join and leave religions, get married etc."""
         self.bot = bot
         self.proposal_gifs = ["https://cdn.discordapp.com/attachments/473953130371874828/700359948646744154/propose1.gif",
@@ -63,7 +63,7 @@ class BelieverManager(commands.Cog, name="Believer"):
 
     @commands.command(name="join", aliases=["enter"])
     @commands.check(utilchecks.isNotBeliever)
-    async def _join(self, ctx: Context, arg1):
+    async def _join(self, ctx: Context, arg1: str):
         """Joins a religion."""
         believer = database.getBeliever(ctx.author.id, ctx.guild.id)
         if believer:
@@ -150,7 +150,7 @@ class BelieverManager(commands.Cog, name="Believer"):
     @commands.command(name="marry", aliases=["propose"])
     @commands.check(utilchecks.isBeliever)
     @commands.check(utilchecks.isNotMarried)
-    async def _marry(self, ctx: Context, arg1):
+    async def _marry(self, ctx: Context, arg1: str):
         """Marry that special someone."""
         guildid = ctx.guild.id
         user1 = ctx.author
@@ -243,5 +243,5 @@ class BelieverManager(commands.Cog, name="Believer"):
             await ctx.send(ctx.author.name + " just divorced " + lover.name + "!")
 
 
-def setup(bot):
+def setup(bot: commands.Bot):
     bot.add_cog(BelieverManager(bot))

@@ -8,7 +8,7 @@ from Util.botutils import botutils
 
 
 class BotManager(commands.Cog, name="Bot Commands"):
-    def __init__(self, bot):
+    def __init__(self, bot: discord.ext.commands.Bot):
         """Where is the source code? How can I invite the bot? All these questions have their answers right here."""
         self.bot = bot
 
@@ -121,11 +121,11 @@ class BotManager(commands.Cog, name="Bot Commands"):
 
     @commands.command(name="loadcog", aliases=["loadextension"])
     @commands.is_owner()
-    async def _loadcog(self, ctx: Context, arg1):
+    async def _loadcog(self, ctx: Context, arg1: str):
         """Loads a cog."""
         bot = self.bot
         try:
-            bot.load_extension(f"cogs.{arg1}")
+            await bot.load_extension(f"cogs.{arg1}")
             await ctx.send(f"Successfully loaded the {arg1} extension")
             await logger.log("Moderator `%s` loaded the extension %s" % (ctx.author.name, arg1), bot, "INFO")
         except Exception as e:
@@ -144,11 +144,11 @@ class BotManager(commands.Cog, name="Bot Commands"):
 
     @commands.command(name="unloadcog", aliases=["unloadextension"])
     @commands.is_owner()
-    async def _unloadcog(self, ctx: Context, arg1):
+    async def _unloadcog(self, ctx: Context, arg1: str):
         """Unloads a cog."""
         bot = self.bot
         try:
-            bot.unload_extension(f"cogs.{arg1}")
+            await bot.unload_extension(f"cogs.{arg1}")
             await ctx.send(f"Successfully unloaded the {arg1} extension")
             await logger.log("Moderator `%s` unloaded the extension %s" % (ctx.author.name, arg1), bot, "INFO")
         except Exception as e:
@@ -156,5 +156,5 @@ class BotManager(commands.Cog, name="Bot Commands"):
             await logger.log(f"Failed to unload the extension {arg1} - {e}", bot, "ERROR")
 
 
-def setup(bot):
+def setup(bot: discord.ext.commands.Bot):
     bot.add_cog(BotManager(bot))

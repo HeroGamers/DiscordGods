@@ -1,24 +1,22 @@
 import os
 import random
 from typing import Union
-
 import discord
 from discord.ext.commands import Context
-
 import database
 from Util import logger
 
 
 # ------------ COMMAND CHECKS ------------ #
 
-def isBeliever(ctx: Context):
+def isBeliever(ctx: Context) -> bool:
     believer = database.getBeliever(ctx.author.id, ctx.guild.id)
     if believer:
         return True
     return False
 
 
-def isPriest(ctx: Context):
+def isPriest(ctx: Context) -> bool:
     believer = database.getBeliever(ctx.author.id, ctx.guild.id)
     if believer:
         god = database.getGod(believer.God)
@@ -29,14 +27,14 @@ def isPriest(ctx: Context):
     return False
 
 
-def isNotBeliever(ctx: Context):
+def isNotBeliever(ctx: Context) -> bool:
     believer = database.getBeliever(ctx.author.id, ctx.guild.id)
     if believer:
         return False
     return True
 
 
-def isMarried(ctx: Context):
+def isMarried(ctx: Context) -> bool:
     believer = database.getBeliever(ctx.author.id, ctx.guild.id)
     if believer:
         married = database.getMarriage(believer.ID)
@@ -46,7 +44,7 @@ def isMarried(ctx: Context):
     return False
 
 
-def isNotMarried(ctx: Context):
+def isNotMarried(ctx: Context) -> bool:
     believer = database.getBeliever(ctx.author.id, ctx.guild.id)
     if believer:
         married = database.getMarriage(believer.ID)
@@ -56,7 +54,7 @@ def isNotMarried(ctx: Context):
     return True
 
 
-def hasOffer(ctx: Context):
+def hasOffer(ctx: Context) -> bool:
     believer = database.getBeliever(ctx.author.id, ctx.guild.id)
     if believer:
         priestoffer = database.getPriestOffer(believer.God)
@@ -83,7 +81,7 @@ class botutils:
 
     # Function to get the currently used prefix
     @classmethod
-    def getPrefix(cls, guildid: int):
+    def getPrefix(cls, guildid: int) -> str:
         guildconfig = database.getGuild(guildid)
 
         if not guildconfig:
@@ -126,7 +124,7 @@ class botutils:
 
     # Get a God's "title"/suffix depending on Gender
     @classmethod
-    def getGodString(cls, god):
+    def getGodString(cls, god: database.gods) -> str:
         god_title = "God"
 
         if god.Gender:
@@ -143,7 +141,7 @@ class botutils:
 
     # Get a God's mood
     @classmethod
-    def getGodMood(cls, moodValue):
+    def getGodMood(cls, moodValue: float) -> str:
         if moodValue < -100:
             mood = "Confused"
         elif moodValue < -70:
@@ -163,7 +161,7 @@ class botutils:
 
     # Function to add a new priest offer to the db, and message the user about their new offer
     @classmethod
-    async def doNewPriestOffer(cls, bot, god, old_priestoffer=None):
+    async def doNewPriestOffer(cls, bot: discord.ext.commands.Bot, god: database.gods, old_priestoffer: database.offers = None) -> None:
         believers = database.getBelieversByID(god.ID)
 
         if len(believers) >= 3:
@@ -228,7 +226,7 @@ class botutils:
             logger.logDebug("Not more than 3 believers in god, skipping new priest candidate check")
 
     @classmethod
-    def disbandGod(cls, godid):
+    def disbandGod(cls, godid: int) -> bool:
         god = database.getGod(godid)
         if not god:
             return False

@@ -7,7 +7,7 @@ from Util import logger
 
 
 class BotLists(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         """A cog for the several botlists."""
         self.bot = bot
         self.topgg_token = os.getenv('top.gg_token')  # https://top.gg/
@@ -88,5 +88,5 @@ class BotLists(commands.Cog):
         await self.bot.wait_until_ready()
 
 
-def setup(bot):
+def setup(bot: commands.Bot):
     bot.add_cog(BotLists(bot))
