@@ -5,13 +5,13 @@ except ImportError:
     print("Couldn't import config.py! Exiting!")
     exit()
 
+import asyncio
 import discord
-from discord.ext import commands
-from discord import Embed
+from discord.ext.commands._types import BotT
 from Util import logger
-from Util.botutils import botutils
-import database
 import os
+from typing import Any
+import cogs
 
 # Import a monkey patch, if that exists
 try:
@@ -19,31 +19,38 @@ try:
 except ImportError:
     print("DEBUG: No Monkey patch found!")
 
-
-async def getPrefix(bot, message):
-    guild = message.guild
-
-    prefixes = [os.getenv('prefix')+"gods ", os.getenv('prefix')+"g ", "<@"+str(bot.user.id)+"> ", "<@!"+str(bot.user.id)+"> "]
-
-    if guild:
-        guildconfig = database.getGuild(guild.id)
-        if guildconfig:
-            prefixes.append(guildconfig.Prefix)
-    return prefixes
+TEST_GUILD = discord.Object(id=473953130371874826)
 
 
-bot = commands.Bot(command_prefix=getPrefix, description='Religion has never been easier!',
-                   activity=discord.Game(name="with religions | " + os.getenv('prefix') + "gods howto"))
+class DiscordGods(discord.ext.commands.Bot):
+    def __init__(self, command_prefix, *, intents: discord.Intents,
+                 **options: Any) -> None:
+        super().__init__(command_prefix=command_prefix, intents=intents, options=options)
+
+    async def setup_hook(self):
+        bot.remove_command("help")
+        # Load commands
+        for command_group in command_groups:
+            try:
+                bot.tree.add_command(command_group)
+            except Exception as e:
+                logger.logDebug(f"Failed to load command group {command_group}. - {e}", "ERROR")
+        # Load tasks
+        for task in tasks:
+            try:
+                await bot.load_extension(f"cogs.{task}")
+            except Exception as e:
+                logger.logDebug(f"Failed to load task {task}. - {e}", "ERROR")
+
+        # self.tree.copy_global_to(guild=TEST_GUILD)
+        # await self.tree.sync(guild=TEST_GUILD)
+        await self.tree.sync()
 
 
-startup_extensions = ["BotManager",
-                      "GodManager",
-                      "BotLists",
-                      "BelieverManager",
-                      "Info",
-                      "Tasks",
-                      "Misc",
-                      "AdminManager"]
+intents = discord.Intents.default()
+bot: discord.ext.commands.Bot = DiscordGods(intents=intents, description='Religion has never been easier!',
+                                            command_prefix=os.getenv("prefix"),
+                                            activity=discord.Game(name="with religions | /gods howto"))
 
 
 @bot.event
@@ -64,74 +71,86 @@ async def on_ready():
     logger.logDebug("Gods has (re)connected to Discord!")
 
 
-@bot.event
-async def on_command_error(ctx: commands.Context, error):
-    if isinstance(error, commands.NoPrivateMessage):
-        await ctx.send("This command cannot be used in private messages")
-    elif isinstance(error, commands.BotMissingPermissions):
-        await ctx.send(
-            embed=Embed(color=discord.Color.red(), description="I need permissions to do that!"))
-    elif isinstance(error, commands.MissingPermissions):
-        await ctx.send(
-            embed=Embed(color=discord.Color.red(), description="You are missing permissions to do that!"))
-    elif isinstance(error, commands.CheckFailure):
-        return
-    elif isinstance(error, commands.CommandOnCooldown):
-        return
-    elif isinstance(error, commands.MissingRequiredArgument):
-        return
-    elif isinstance(error, commands.BadArgument):
-        return
-    elif isinstance(error, commands.CommandNotFound):
-        return
-    elif "User not found!" in str(error):
-        await ctx.send("Error: User not found! Try mentioning or using an ID!")
-    else:
-        await ctx.send("Something went wrong while executing that command... Sorry!")
-        await logger.log("%s" % error, bot, "ERROR")
+# @bot.event
+# async def on_command_error(ctx: commands.Context, error):
+#     if isinstance(error, commands.NoPrivateMessage):
+#         await ctx.send("This command cannot be used in private messages")
+#     elif isinstance(error, commands.BotMissingPermissions):
+#         await ctx.send(
+#             embed=Embed(color=discord.Color.red(), description="I need permissions to do that!"))
+#     elif isinstance(error, commands.MissingPermissions):
+#         await ctx.send(
+#             embed=Embed(color=discord.Color.red(), description="You are missing permissions to do that!"))
+#     elif isinstance(error, commands.CheckFailure):
+#         return
+#     elif isinstance(error, commands.CommandOnCooldown):
+#         return
+#     elif isinstance(error, commands.MissingRequiredArgument):
+#         return
+#     elif isinstance(error, commands.BadArgument):
+#         return
+#     elif isinstance(error, commands.CommandNotFound):
+#         return
+#     elif "User not found!" in str(error):
+#         await ctx.send("Error: User not found! Try mentioning or using an ID!")
+#     else:
+#         await ctx.send("Something went wrong while executing that command... Sorry!")
+#         await logger.log("%s" % error, bot, "ERROR")
 
 
 @bot.event
-async def on_guild_join(guild):
+async def on_guild_join(guild: discord.Guild):
     await logger.log("Joined a new guild (`%s` - `%s`)" % (guild.name, guild.id), bot, "INFO")
 
 
 @bot.event
-async def on_guild_remove(guild):
+async def on_guild_remove(guild: discord.Guild):
+    import database
     await logger.log("Left a new guild (`%s` - `%s`)" % (guild.name, guild.id), bot, "INFO")
 
-    # Disband any gods in the guild
-    gods = database.getGods(guild.id)
-    if gods:
-        for god in gods:
-            botutils.disbandGod(god.ID)
+    # Disband any gods in the guild (done by cascade)
+    db_guild = database.getGuild(guild.id)
+    if db_guild:
+        db_guild.delete_instance()
 
 
-@bot.event
-async def on_message(message: discord.Message):
-    if message.author.bot:
-        return
-    ctx: commands.Context = await bot.get_context(message)
+# @bot.event
+# async def on_message(message: discord.Message):
+#     if message.author.bot:
+#         return
+#     ctx: commands.Context = await bot.get_context(message)
+#
+#     if ctx.command is not None:
+#         if isinstance(message.channel, discord.DMChannel):
+#             await logger.log("`%s` (%s) used the `%s` command in their DM's" % (
+#                 ctx.author.name, ctx.author.id, ctx.invoked_with), bot, "INFO")
+#         else:
+#             await logger.log("`%s` (%s) used the `%s` command in the guild `%s` (%s), in the channel `%s` (%s)" % (
+#                 ctx.author.name, ctx.author.id, ctx.invoked_with, ctx.guild.name, ctx.guild.id, ctx.channel.name,
+#                 ctx.channel.id), bot, "INFO")
+#         await bot.invoke(ctx)
 
-    if ctx.command is not None:
-        if isinstance(message.channel, discord.DMChannel):
-            await logger.log("`%s` (%s) used the `%s` command in their DM's" % (
-                ctx.author.name, ctx.author.id, ctx.invoked_with), bot, "INFO")
-        else:
-            await logger.log("`%s` (%s) used the `%s` command in the guild `%s` (%s), in the channel `%s` (%s)" % (
-                ctx.author.name, ctx.author.id, ctx.invoked_with, ctx.guild.name, ctx.guild.id, ctx.channel.name,
-                ctx.channel.id), bot, "INFO")
-        await bot.invoke(ctx)
+command_groups = [
+    cogs.BotManager(bot),
+    cogs.GodManager(bot),
+    cogs.BelieverManager(bot),
+    cogs.Info(bot),
+    cogs.Misc(bot),
+    cogs.AdminManager(bot)
+]
+
+tasks = [
+    "BotLists",
+    "Tasks"
+]
+
+
+async def main():
+    logger.setup_logger()
+
+    async with bot:
+        await bot.start(os.getenv('token'))
 
 
 if __name__ == '__main__':
-    logger.setup_logger()
-
-    # Load extensions
-    for extension in startup_extensions:
-        try:
-            bot.load_extension(f"cogs.{extension}")
-        except Exception as e:
-            logger.logDebug(f"Failed to load extension {extension}. - {e}", "ERROR")
-
-bot.run(os.getenv('token'))
+    asyncio.run(main())

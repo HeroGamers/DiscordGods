@@ -8,19 +8,20 @@ from Util import logger
 from Util.botutils import botutils
 
 
-class Tasks(commands.Cog, name="Tasks"):
-    def __init__(self, bot):
+class Tasks(commands.Cog, name="tasks"):
+    def __init__(self, bot: discord.ext.commands.Bot):
         """The Cog running the tasks in the background, like clearing old invites, changing the presence etc."""
         self.bot = bot
 
         self.firstrundone = False
 
+    async def cog_load(self):
         self.doFalloffs.start()
         self.clearOldInvites.start()
         self.priestTask.start()
         self.doPresenceUpdate.start()
 
-    def cog_unload(self):
+    async def cog_unload(self):
         self.doFalloffs.cancel()
         self.clearOldInvites.cancel()
         self.priestTask.cancel()
@@ -86,5 +87,5 @@ class Tasks(commands.Cog, name="Tasks"):
         await self.bot.wait_until_ready()
 
 
-def setup(bot):
-    bot.add_cog(Tasks(bot))
+async def setup(bot: discord.ext.commands.Bot):
+    await bot.add_cog(Tasks(bot))
