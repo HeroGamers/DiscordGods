@@ -459,7 +459,7 @@ def deletePriestOffer(offerid: int) -> bool:
 
 
 # Get and clear old priest offers
-def clearOldPriestOffers() -> bool:
+def clearOldPriestOffers() -> List[offers]:
     date = datetime.datetime.today() - datetime.timedelta(days=1)
     priestoffers = offers.select().where((offers.Type == 2) & (offers.CreationDate < date))
     if priestoffers.exists():
@@ -467,7 +467,7 @@ def clearOldPriestOffers() -> bool:
         query = offers.delete().where((offers.Type == 2) & (offers.CreationDate < date))
         query.execute()
         return priestoffers
-    return False
+    return []
 
 
 # ------------------------------------------ CUSTOM CONFIGS FOR GUILDS ------------------------------------------ #
