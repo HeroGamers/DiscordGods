@@ -1,4 +1,7 @@
 import random
+
+import discord
+from discord import app_commands
 from discord.ext import commands
 import database
 from Util import logger
@@ -6,169 +9,147 @@ from Util.botutils import botutils
 from Util import botutils as utilchecks
 
 
-class GodManager(commands.Cog, name="Religion Management"):
-    def __init__(self, bot):
+class GodManager(app_commands.Group, name="religion"):
+    def __init__(self, bot: discord.ext.commands.Bot):
         """Manage the religions, create new religions, and set their types as a priest."""
+        super().__init__()
         self.bot = bot
 
     # ------------ GOD MANAGEMENT ------------ #
 
-    @commands.command(name="create", aliases=["newgod"])
-    @commands.check(utilchecks.isNotBeliever)
-    async def _create(self, ctx, *args):
+    @app_commands.command(name="create")
+    @app_commands.check(utilchecks.isNotBeliever)
+    async def _create(self, interaction: discord.Interaction, name: str, gender: str = None):
         """Creates a new God."""
-        user = ctx.author
+        user = interaction.user
 
-        if database.getBeliever(user.id, ctx.guild.id):
-            await ctx.send("You are already in a God, please leave it to create a new one using `/gods leave`!")
+        if database.getBeliever(user.id, interaction.guild.id):
+            await interaction.response.send_message("You are already in a God, please leave it to create a new one using `/gods leave`!", ephemeral=True)
             return
 
-        if len(args) < 1:
-            await ctx.send("Please give your God a name!")
+        if not name:
+            await interaction.response.send_message("Please give your God a name!", ephemeral=True)
             return
 
-        if database.getGodName(args[0], ctx.guild.id):
-            await ctx.send("A God with that name already exists!")
+        if database.getGodName(name, interaction.guild.id):
+            await interaction.response.send_message("A God with that name already exists!", ephemeral=True)
             return
 
-        if len(args[0]) > 16:
-            await ctx.send("Please choose a name that's not longer than 16 characters!")
+        if len(name) > 16:
+            await interaction.response.send_message("Please choose a name that's not longer than 16 characters!", ephemeral=True)
             return
 
-        if len(args) > 1:
-            if len(args[1]) > 19:
-                await ctx.send("Please choose a gender that's not longer than 19 characters!")
+        if gender:
+            if len(gender) > 19:
+                await interaction.response.send_message("Please choose a gender that's not longer than 19 characters!", ephemeral=True)
                 return
 
-            god = database.newGod(ctx.guild.id, args[0], random.choice(botutils.godtypes)[0], args[1])
+            god = database.newGod(interaction.guild.id, name, random.choice(list(botutils.GodTypes)).name, gender)
         else:
-            god = database.newGod(ctx.guild.id, args[0], random.choice(botutils.godtypes)[0])
+            god = database.newGod(interaction.guild.id, name, random.choice(list(botutils.GodTypes)).name)
         if god.ID:
-            await ctx.send("God created!")
+            await interaction.response.send_message("God created!", ephemeral=True)
             believer = database.newBeliever(user.id, god)
             if believer.ID:
                 logger.logDebug("Believer created!")
         else:
-            await ctx.send("Boohoo, God creation failed...")
+            await interaction.response.send_message("Boohoo, God creation failed...", ephemeral=True)
 
-    @commands.command(name="access", aliases=["lock", "open"])
-    @commands.check(utilchecks.isPriest)
-    async def _access(self, ctx):
+    @app_commands.command(name="lock")
+    @app_commands.check(utilchecks.isPriest)
+    async def _access(self, interaction: discord.Interaction):
         """Set your religion as open or invite only."""
-        god = database.getBeliever(ctx.author.id, ctx.guild.id).God
+        god = database.getBeliever(interaction.user.id, interaction.guild.id).God
 
         if god:
             if database.toggleAccess(god.ID):
-                await ctx.send("God is now Invite Only!")
+                await interaction.response.send_message("God is now Invite Only!", ephemeral=True)
             else:
-                await ctx.send("God is now Open!")
+                await interaction.response.send_message("God is now Open!", ephemeral=True)
 
-    # @commands.command(name="ally", aliases=["friend"])
-    # @commands.check(utilchecks.isPriest)
-    # async def _ally(self, ctx):
+    # @app_commands.command(name="ally", aliases=["friend"])
+    # @app_commands.check(utilchecks.isPriest)
+    # async def _ally(self, interaction: discord.Interaction):
     #     """Toggles alliance with another religion - Not done"""
     #     logger.logDebug("yes")
     #
-    # @commands.command(name="war", aliases=["enemy"])
-    # @commands.check(utilchecks.isPriest)
-    # async def _war(self, ctx):
+    # @app_commands.command(name="war", aliases=["enemy"])
+    # @app_commands.check(utilchecks.isPriest)
+    # async def _war(self, interaction: discord.Interaction):
     #     """Toggles war with another religion - Not done"""
     #     logger.logDebug("yes")
 
-    @commands.command(name="description", aliases=["desc"])
-    @commands.check(utilchecks.isPriest)
-    async def _description(self, ctx, *args):
+    @app_commands.command(name="description")
+    @app_commands.check(utilchecks.isPriest)
+    async def _description(self, interaction: discord.Interaction, description: str):
         """Sets a description for your religion."""
-        god = database.getBeliever(ctx.author.id, ctx.guild.id).God
+        god = database.getBeliever(interaction.user.id, interaction.guild.id).God
 
         if god:
-            desc = ""
-            for arg in args:
-                desc = desc + " " + arg
-            desc.strip()
-
-            if len(desc) > 100:
-                await ctx.send("Keep your description under 100 chars, please.")
+            if len(description) > 100:
+                await interaction.response.send_message("Keep your description under 100 chars, please.", ephemeral=True)
                 return
 
-            database.setDesc(god.ID, desc)
-            await ctx.send("Description set successfully!")
+            database.setDesc(god.ID, description)
+            await interaction.response.send_message("Description set successfully!", ephemeral=True)
 
-    @commands.command(name="invite", aliases=["inv"])
-    @commands.check(utilchecks.isPriest)
-    async def _invite(self, ctx, arg1):
+    @app_commands.command(name="invite")
+    @app_commands.check(utilchecks.isPriest)
+    async def _invite(self, interaction: discord.Interaction, user: discord.Member):
         """Invite someone to your religion."""
-        god = database.getBeliever(ctx.author.id, ctx.guild.id).God
+        god = database.getBeliever(interaction.user.id, interaction.guild.id).God
         if god:
-            user = await botutils.getUser(self.bot, ctx.guild, arg1)
-
             if not user:
-                await ctx.send("User not found!")
+                await interaction.response.send_message("User not found!", ephemeral=True)
                 return
 
             if user.bot:
-                await ctx.send("Sorry, but I don't think the bot is going to respond to your invitation...")
+                await interaction.response.send_message("Sorry, but I don't think the bot is going to respond to your invitation...", ephemeral=True)
                 return
 
-            if not ctx.guild.get_member(user.id):
-                if not (await ctx.guild.fetch_member(user.id)):
-                    await ctx.send("The user is not in this server!")
+            if not interaction.guild.get_member(user.id):
+                if not (await interaction.guild.fetch_member(user.id)):
+                    await interaction.response.send_message("The user is not in this server!", ephemeral=True)
                     return
 
-            believer = database.getBeliever(user.id, ctx.guild.id)
+            believer = database.getBeliever(user.id, interaction.guild.id)
             if believer:
                 if believer.God.ID == god.ID:
-                    await ctx.send(user.name + " is already in your religion!")
+                    await interaction.response.send_message(user.name + " is already in your religion!", ephemeral=True)
                     return
 
             invite = database.getInvite(user.id, god.ID)
             if invite:
-                await ctx.send("You already have an active invite for this user to join your God! Tell them to join!")
+                await interaction.response.send_message("You already have an active invite for this user to join your God! Tell them to join!", ephemeral=True)
                 return
 
             if database.newInvite(god.ID, user.id):
-                await ctx.send("An invite to your religion has been sent to the user!\n"
-                               "*Invites will become invalid 24 hours after being issued.*")
+                await interaction.response.send_message("An invite to your religion has been sent to the user!\n"
+                               "*Invites will become invalid 24 hours after being issued.*", ephemeral=True)
             else:
-                await ctx.send("Creating the invite failed!")
+                await interaction.response.send_message("Creating the invite failed!", ephemeral=True)
 
-    @commands.command(name="settype", aliases=["typeset", "type"])
-    @commands.check(utilchecks.isPriest)
-    async def _settype(self, ctx, arg1):
+    @app_commands.command(name="settype")
+    @app_commands.check(utilchecks.isPriest)
+    async def _settype(self, interaction: discord.Interaction, godtype: botutils.GodTypes):
         """Set the type of your God to something else."""
-        god = database.getBeliever(ctx.author.id, ctx.guild.id).God
+        god = database.getBeliever(interaction.user.id, interaction.guild.id).God
         if god:
-            godtypes = []
-            for godTypeSet in botutils.godtypes:
-                godtypes.append(godTypeSet[0])
-
-            if arg1.upper() in godtypes:
-                database.setType(god.ID, arg1.upper())
-                await ctx.send("Set your God's type successfully!")
+            if godtype:
+                database.setType(god.ID, godtype.name)
+                await interaction.response.send_message("Set your God's type successfully!", ephemeral=True)
             else:
-                types_string = ""
-                i = 1
-                for godtype in godtypes:
-                    if i == 1:
-                        types_string = godtype
-                    else:
-                        types_string = types_string + ", " + godtype
-                    i += 1
-                await ctx.send("Please choose between these types: `" + types_string + "`!")
+                await interaction.response.send_message("Please choose between these types: `" + ','.join([godtype.name for godtype in botutils.GodTypes]) + "`!", ephemeral=True)
 
-    @commands.command(name="setgender", aliases=["genderset", "gender"])
-    @commands.check(utilchecks.isPriest)
-    async def _setgender(self, ctx, arg1):
+    @app_commands.command(name="setgender")
+    @app_commands.check(utilchecks.isPriest)
+    async def _setgender(self, interaction: discord.Interaction, gender: str):
         """Set the gender of your God to something else."""
-        god = database.getBeliever(ctx.author.id, ctx.guild.id).God
+        god = database.getBeliever(interaction.user.id, interaction.guild.id).God
         if god:
-            if len(arg1) > 19:
-                await ctx.send("Please choose a gender that's not longer than 19 characters!")
+            if len(gender) > 19:
+                await interaction.response.send_message("Please choose a gender that's not longer than 19 characters!", ephemeral=True)
                 return
 
-            database.setGender(god.ID, arg1)
-            await ctx.send("Gender successfully set to: " + arg1 + "!")
-
-
-def setup(bot):
-    bot.add_cog(GodManager(bot))
+            database.setGender(god.ID, gender)
+            await interaction.response.send_message("Gender successfully set to: " + gender + "!", ephemeral=True)

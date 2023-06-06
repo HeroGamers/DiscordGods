@@ -1,31 +1,33 @@
 import discord
+from discord import app_commands
 from discord.ext import commands
 import database
 from Util.botutils import botutils
 
 
-class Info(commands.Cog, name="Information"):
-    def __init__(self, bot):
+class Info(app_commands.Group, name="information"):
+    def __init__(self, bot: discord.ext.commands.Bot):
         """Get information about different religions, as well as Leaderboards, locally or globally."""
+        super().__init__()
         self.bot = bot
 
     # ------------ INFORMATION ------------ #
 
-    @commands.command(name="info", aliases=["godinfo", "i"])
-    async def _info(self, ctx, *args):
+    @app_commands.command(name="info")
+    async def _info(self, interaction: discord.Interaction, name: str = None):
         """Gets information about a God."""
-        if len(args) > 0:
-            god = database.getGodName(args[0], ctx.guild.id)
+        if name:
+            god = database.getGodName(name, interaction.guild.id)
         else:
-            believer = database.getBeliever(ctx.author.id, ctx.guild.id)
+            believer = database.getBeliever(interaction.user.id, interaction.guild.id)
             if believer:
                 god = database.getGod(believer.God)
             else:
-                await ctx.send("Please give a God name!")
+                await interaction.response.send_message("Please give a God name!", ephemeral=True)
                 return
 
         if not god:
-            await ctx.send("That God doesn't exist!")
+            await interaction.response.send_message("That God doesn't exist!", ephemeral=True)
             return
 
         embedcolor = discord.Color.green()
@@ -34,9 +36,9 @@ class Info(commands.Cog, name="Information"):
                 embedcolor = discord.Color.from_rgb(204, 235, 245)
             if god.Type.upper() == "TRAPS":
                 embedcolor = discord.Color.from_rgb(248, 184, 248)
-            for godtype, color in botutils.godtypes:
-                if godtype == god.Type:
-                    embedcolor = color
+            for godtype in botutils.GodTypes:
+                if godtype.name == god.Type:
+                    embedcolor = godtype.getColor()
 
         title = god.Name + " - " + botutils.getGodString(god) + " of " + god.Type.capitalize()
         if god.Description:
@@ -57,20 +59,20 @@ class Info(commands.Cog, name="Information"):
         embed.add_field(name="Mood:", value=botutils.getGodMood(god.Mood), inline=True)
         embed.add_field(name="Invite Only:", value=god.InviteOnly, inline=True)
         if god.Priest:
-            priest = self.bot.get_user(int(database.getBelieverByID(god.Priest).UserID))
-            embed.set_footer(text="Priest: %s" % priest.name+"#"+priest.discriminator,
-                             icon_url=priest.avatar_url)
+            priest = await botutils.getUser(self.bot, interaction.guild, str(database.getBelieverByID(god.Priest).UserID))
+            if priest:
+                embed.set_footer(text="Priest: %s" % priest.name+"#"+priest.discriminator, icon_url=priest.avatar_url)
         else:
             embed.set_footer(text="This God has no priest yet!",
-                             icon_url=self.bot.user.avatar_url)
-        await ctx.send(embed=embed)
+                             icon_url=self.bot.user.avatar)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
-    @commands.command(name="list", aliases=["gods"])
-    async def _list(self, ctx):
+    @app_commands.command(name="gods")
+    async def _list(self, interaction: discord.Interaction):
         """Lists the top Gods on the server."""
-        gods = database.getGods(ctx.guild.id)
+        gods = database.getGods(interaction.guild.id)
         if not gods:
-            await ctx.send("There are no Gods in " + ctx.guild.name + ", yet... `/gods create <name>`")
+            await interaction.response.send_message("There are no Gods in " + interaction.guild.name + ", yet... `/create <name>`", ephemeral=True)
             return
 
         gods = list(gods)
@@ -95,15 +97,15 @@ class Info(commands.Cog, name="Information"):
 
             i += 1
 
-        await ctx.send("**The Gods of " + ctx.guild.name + "**\n\n"
-                       "```pl\n" + godlist + "```")
+        await interaction.response.send_message("**The Gods of " + interaction.guild.name + "**\n\n"
+                       "```pl\n" + godlist + "```", ephemeral=True)
 
-    @commands.command(name="globallist", aliases=["globalgods", "glist", "ggods"])
-    async def _globallist(self, ctx):
+    @app_commands.command(name="globalgods")
+    async def _globallist(self, interaction: discord.Interaction):
         """Lists the top Gods globally."""
         gods = database.getGodsGlobal()
         if not gods:
-            await ctx.send("There are no Gods, yet... `/gods create <name>`")
+            await interaction.response.send_message("There are no Gods, yet... `/create <name>`", ephemeral=True)
             return
 
         gods = list(gods)
@@ -136,15 +138,15 @@ class Info(commands.Cog, name="Information"):
 
             i += 1
 
-        await ctx.send("**The Global Gods Leaderboard**\n\n"
-                       "```pl\n" + godlist + "```")
+        await interaction.response.send_message("**The Global Gods Leaderboard**\n\n"
+                       "```pl\n" + godlist + "```", ephemeral=True)
 
-    @commands.command(name="marriages", aliases=["not_singles_like_you", "marrylist"])
-    async def _marriages(self, ctx):
+    @app_commands.command(name="marriages")
+    async def _marriages(self, interaction: discord.Interaction):
         """Lists the most loving married couples on the server."""
-        marriages = database.getMarriages(ctx.guild.id)
+        marriages = database.getMarriages(interaction.guild.id)
         if not marriages:
-            await ctx.send("There are no Marriages in " + ctx.guild.name + ", yet... `/gods marry <someone special>`")
+            await interaction.response.send_message("There are no Marriages in " + interaction.guild.name + ", yet... `/marry <someone special>`", ephemeral=True)
             return
 
         marriages = list(marriages)
@@ -156,9 +158,9 @@ class Info(commands.Cog, name="Information"):
             if i > 15:
                 break
 
-            believer1 = await botutils.getUser(self.bot, ctx.guild, database.getBelieverByID(marriage.Believer1).UserID)
+            believer1 = await botutils.getUser(self.bot, interaction.guild, database.getBelieverByID(marriage.Believer1).UserID)
 
-            believer2 = await botutils.getUser(self.bot, ctx.guild, database.getBelieverByID(marriage.Believer2).UserID)
+            believer2 = await botutils.getUser(self.bot, interaction.guild, database.getBelieverByID(marriage.Believer2).UserID)
 
             god = database.getGod(marriage.God)
 
@@ -169,15 +171,15 @@ class Info(commands.Cog, name="Information"):
 
             i += 1
 
-        await ctx.send("**The Married Couples of " + ctx.guild.name + "**\n\n"
-                       "```pl\n" + marriagelist + "```")
+        await interaction.response.send_message("**The Married Couples of " + interaction.guild.name + "**\n\n"
+                       "```pl\n" + marriagelist + "```", ephemeral=True)
 
-    @commands.command(name="globalmarriages", aliases=["gmarriages", "globalmarrylist"])
-    async def _globalmarriages(self, ctx):
+    @app_commands.command(name="globalmarriages")
+    async def _globalmarriages(self, interaction: discord.Interaction):
         """Lists the most loving married couples globally."""
         marriages = database.getMarriagesGlobal()
         if not marriages:
-            await ctx.send("There are no Marriages, yet... `/gods marry <someone special>`")
+            await interaction.response.send_message("There are no Marriages, yet... `/marry <someone special>`", ephemeral=True)
             return
 
         marriages = list(marriages)
@@ -189,9 +191,9 @@ class Info(commands.Cog, name="Information"):
             if i > 10:
                 break
 
-            believer1 = await botutils.getUser(self.bot, ctx.guild, database.getBelieverByID(marriage.Believer1).UserID)
+            believer1 = await botutils.getUser(self.bot, interaction.guild, database.getBelieverByID(marriage.Believer1).UserID)
 
-            believer2 = await botutils.getUser(self.bot, ctx.guild, database.getBelieverByID(marriage.Believer2).UserID)
+            believer2 = await botutils.getUser(self.bot, interaction.guild, database.getBelieverByID(marriage.Believer2).UserID)
 
             god = database.getGod(marriage.God)
             guild_name = "NaN"
@@ -208,9 +210,5 @@ class Info(commands.Cog, name="Information"):
 
             i += 1
 
-        await ctx.send("**The Global Married Couples Leaderboard**\n\n"
-                       "```pl\n" + marriagelist + "```")
-
-
-def setup(bot):
-    bot.add_cog(Info(bot))
+        await interaction.response.send_message("**The Global Married Couples Leaderboard**\n\n"
+                       "```pl\n" + marriagelist + "```", ephemeral=True)

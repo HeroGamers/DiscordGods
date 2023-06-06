@@ -1,21 +1,24 @@
+from typing import Literal
 import discord
+from discord import app_commands
 from discord.ext import commands
 import database
 from Util import logger
-from Util.botutils import botutils
+import Util.botutils as utilchecks
 
 
-class BotManager(commands.Cog, name="Bot Commands"):
-    def __init__(self, bot):
+class BotManager(app_commands.Group, name="general"):
+    def __init__(self, bot: discord.ext.commands.Bot):
         """Where is the source code? How can I invite the bot? All these questions have their answers right here."""
+        super().__init__()
         self.bot = bot
 
-    @commands.command(name="howto", aliases=["helpme"])
-    async def _howto(self, ctx, *args):
+    @app_commands.command(name="howto")
+    async def _howto(self, interaction: discord.Interaction, category: Literal["management", "miscellaneous"]):
         """Get help on how to use Gods."""
-        prefix = botutils.getPrefix(ctx.guild.id)
-        if not args:
-            await ctx.send("```\n"
+        prefix = "/"
+        if not category:
+            await interaction.response.send_message("```\n"
                            "So... You want to start a new religion. Or, maybe you want to join an already existing "
                            "religion? Wait... oh, you are already experienced in the ways of Gods? Well, there are "
                            "categories to further expand your knowledge around this mess of commands!\n"
@@ -38,10 +41,10 @@ class BotManager(commands.Cog, name="Bot Commands"):
                            "Gets help about managing a God. Directed towards Priests.\n"
                            "  Misc                                "
                            "Miscellaneous things like marriage and hugs.\n"
-                           "```")
+                           "```", ephemeral=True)
         else:
-            if args[0].lower() == "management":
-                await ctx.send("```\n"
+            if category.lower() == "management":
+                await interaction.response.send_message("```\n"
                                "Phew, the management of religions. These commands are for Priests only.\n"
                                "\n"
                                "  <> = required argument. [] = optional argument.\n"
@@ -62,9 +65,9 @@ class BotManager(commands.Cog, name="Bot Commands"):
                                "> Set the type of your God:\n"
                                "    " + prefix + "settype <type>              "
                                                  "Example types include Love, War and Thunder.\n"
-                               "```")
-            elif (args[0].lower() == "misc") or (args[0].lower() == "miscellaneous"):
-                await ctx.send("```\n"
+                               "```", ephemeral=True)
+            elif (category.lower() == "misc") or (category.lower() == "miscellaneous"):
+                await interaction.response.send_message("```\n"
                                "So, you wanna get married, huh?\n"
                                "\n"
                                "  <> = required argument. [] = optional argument.\n"
@@ -80,79 +83,75 @@ class BotManager(commands.Cog, name="Bot Commands"):
                                "> Hug someone:\n"
                                "    " + prefix + "hug <mention or ID>         "
                                                  "Hugs someone - Costs 0.5 Prayer Power.\n"
-                               "```")
+                               "```", ephemeral=True)
             else:
-                await ctx.send("Category not found!")
+                await interaction.response.send_message("Category not found!", ephemeral=True)
 
-    @commands.command(name="source", aliases=["code", "sourcecode"])
-    async def _source(self, ctx):
+    @app_commands.command(name="sourcecode")
+    async def _source(self, interaction: discord.Interaction):
         """View and/or help with the source code of Gods."""
-        await ctx.send("The source code for Gods can be found here: https://github.com/Fido2603/DiscordGods")
+        await interaction.response.send_message("The source code for Gods can be found here: https://github.com/HeroGamers/DiscordGods", ephemeral=True)
 
-    @commands.command(name="support")
-    async def _support(self, ctx):
+    @app_commands.command(name="support")
+    async def _support(self, interaction: discord.Interaction):
         """Get help and support regarding the bot."""
-        await ctx.send("The server where the Gods roam, Treeland: https://discord.gg/PvFPEfd")
+        await interaction.response.send_message("The server where the Gods roam, Treeland: https://discord.gg/PvFPEfd", ephemeral=True)
 
-    @commands.command(name="botinvite", aliases=["invitebot", "addbot"])
-    async def _botinvite(self, ctx):
+    @app_commands.command(name="botinvite")
+    async def _botinvite(self, interaction: discord.Interaction):
         """How to invite the bot."""
-        await ctx.send(
+        await interaction.response.send_message(
             "Invite me to your server with this link: "
-            "<https://discordapp.com/oauth2/authorize?scope=bot&client_id=180405652605239296>")
+            "<https://discordapp.com/oauth2/authorize?scope=bot&client_id=180405652605239296>", ephemeral=True)
 
-    @commands.command(name="botinfo", aliases=["bot"])
-    async def _botinfo(self, ctx):
+    @app_commands.command(name="botinfo")
+    async def _botinfo(self, interaction: discord.Interaction):
         """Retrives information about the bot."""
         embed = discord.Embed(title="Bot Information", color=discord.Color.green(),
                               description="")
         embed.add_field(name="Creation Date",
-                        value="%s" % discord.utils.snowflake_time(ctx.bot.user.id).strftime(
+                        value="%s" % discord.utils.snowflake_time(self.bot.user.id).strftime(
                             "%Y-%m-%d %H:%M:%S"), inline=True)
         embed.add_field(name="Guilds", value="%s" % len(self.bot.guilds), inline=True)
         embed.add_field(name="Gods", value="%s" % str(database.getGodsGlobalCount()), inline=True)
         embed.add_field(name="Believers", value="%s" % str(database.getBelieversGlobalCount()), inline=True)
         embed.add_field(name="Privacy Policy", value="For the Privacy Policy, please [click here](https://gist.github.com/HeroGamers/a92b824d899981c4c6c287978a54548c)!", inline=True)
-        embed.set_footer(text="%s" % ctx.author.name,
-                         icon_url=ctx.author.avatar_url)
-        await ctx.send(embed=embed)
+        embed.set_footer(text="%s" % interaction.user.name,
+                         icon_url=interaction.user.avatar_url)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
-    @commands.command(name="loadcog", aliases=["loadextension"])
-    @commands.is_owner()
-    async def _loadcog(self, ctx, arg1):
+    @app_commands.command(name="loadcog")
+    @app_commands.check(utilchecks.isOwner)
+    async def _loadcog(self, interaction: discord.Interaction, cog: str):
         """Loads a cog."""
         bot = self.bot
         try:
-            bot.load_extension(f"cogs.{arg1}")
-            await ctx.send(f"Successfully loaded the {arg1} extension")
-            await logger.log("Moderator `%s` loaded the extension %s" % (ctx.author.name, arg1), bot, "INFO")
+            await bot.load_extension(f"cogs.{cog}")
+            await interaction.response.send_message(f"Successfully loaded the {cog} extension", ephemeral=True)
+            await logger.log("Moderator `%s` loaded the extension %s" % (interaction.user.name, cog), bot, "INFO")
         except Exception as e:
-            await ctx.send(f"Failed to load the extension {arg1}")
-            await logger.log(f"Failed to load the extension {arg1} - {e}", bot, "ERROR")
+            await interaction.response.send_message(f"Failed to load the extension {cog}", ephemeral=True)
+            await logger.log(f"Failed to load the extension {cog} - {e}", bot, "ERROR")
 
-    @commands.command(name="listcogs", aliases=["cogs"])
-    @commands.is_owner()
-    async def _listcogs(self, ctx):
+    @app_commands.command(name="cogs")
+    @app_commands.check(utilchecks.isOwner)
+    async def _listcogs(self, interaction: discord.Interaction):
         """Lists all the cogs."""
         embed = discord.Embed(title="Cogs", color=discord.Color.green(),
                               description="`AdminManager, BelieverManager, BotLists, BotManager, GodManager, Info, "
                                           "Misc, Tasks`")
-        embed.set_footer(text=ctx.author.name, icon_url=ctx.author.avatar_url)
-        await ctx.send(embed=embed)
+        embed.set_footer(text=interaction.user.name, icon_url=interaction.user.avatar_url)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
-    @commands.command(name="unloadcog", aliases=["unloadextension"])
-    @commands.is_owner()
-    async def _unloadcog(self, ctx, arg1):
+    @app_commands.command(name="unloadcog")
+    @app_commands.check(utilchecks.isOwner)
+    async def _unloadcog(self, interaction: discord.Interaction, cog: str):
         """Unloads a cog."""
         bot = self.bot
         try:
-            bot.unload_extension(f"cogs.{arg1}")
-            await ctx.send(f"Successfully unloaded the {arg1} extension")
-            await logger.log("Moderator `%s` unloaded the extension %s" % (ctx.author.name, arg1), bot, "INFO")
+            await bot.unload_extension(f"cogs.{cog}")
+            await interaction.response.send_message(f"Successfully unloaded the {cog} extension", ephemeral=True)
+            await logger.log("Moderator `%s` unloaded the extension %s" % (interaction.user.name, cog), bot, "INFO")
         except Exception as e:
-            await ctx.send(f"Failed to unload the extension {arg1}")
-            await logger.log(f"Failed to unload the extension {arg1} - {e}", bot, "ERROR")
-
-
-def setup(bot):
-    bot.add_cog(BotManager(bot))
+            await interaction.response.send_message(f"Failed to unload the extension {cog}", ephemeral=True)
+            await logger.log(f"Failed to unload the extension {cog} - {e}", bot, "ERROR")
