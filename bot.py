@@ -50,7 +50,7 @@ class DiscordGods(discord.ext.commands.Bot):
 intents = discord.Intents.default()
 bot: discord.ext.commands.Bot = DiscordGods(intents=intents, description='Religion has never been easier!',
                                             command_prefix=os.getenv("prefix"),
-                                            activity=discord.Game(name="with religions | /gods howto"))
+                                            activity=discord.Game(name="with religions | /bot howto"))
 
 
 @bot.event
