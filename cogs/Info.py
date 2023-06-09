@@ -62,11 +62,11 @@ class Info(app_commands.Group, name="info"):
         if god.Priest:
             priest = await botutils.getUser(self.bot, interaction.guild, str(database.getBelieverByID(god.Priest).UserID))
             if priest:
-                embed.set_footer(text="Priest: %s" % priest.name+"#"+priest.discriminator, icon_url=priest.avatar_url)
+                embed.set_footer(text="Priest: %s" % priest.name+"#"+priest.discriminator, icon_url=priest.avatar)
         else:
             embed.set_footer(text="This God has no priest yet!",
                              icon_url=self.bot.user.avatar)
-        await interaction.response.send_message(embed=embed, ephemeral=show)
+        await interaction.response.send_message(embed=embed, ephemeral=(not show))
 
     @app_commands.command(name="gods")
     async def _list(self, interaction: discord.Interaction, show: bool = True):
@@ -99,7 +99,7 @@ class Info(app_commands.Group, name="info"):
             i += 1
 
         await interaction.response.send_message("**The Gods of " + interaction.guild.name + "**\n\n"
-                       "```pl\n" + godlist + "```", ephemeral=show)
+                       "```pl\n" + godlist + "```", ephemeral=(not show))
 
     @app_commands.command(name="globalgods")
     async def _globallist(self, interaction: discord.Interaction, show: bool = True):
@@ -140,7 +140,7 @@ class Info(app_commands.Group, name="info"):
             i += 1
 
         await interaction.response.send_message("**The Global Gods Leaderboard**\n\n"
-                       "```pl\n" + godlist + "```", ephemeral=show)
+                       "```pl\n" + godlist + "```", ephemeral=(not show))
 
     @app_commands.command(name="marriages")
     async def _marriages(self, interaction: discord.Interaction, show: bool = True):
@@ -173,7 +173,7 @@ class Info(app_commands.Group, name="info"):
             i += 1
 
         await interaction.response.send_message("**The Married Couples of " + interaction.guild.name + "**\n\n"
-                       "```pl\n" + marriagelist + "```", ephemeral=show)
+                       "```pl\n" + marriagelist + "```", ephemeral=(not show))
 
     @app_commands.command(name="globalmarriages")
     async def _globalmarriages(self, interaction: discord.Interaction, show: bool = True):
@@ -212,4 +212,4 @@ class Info(app_commands.Group, name="info"):
             i += 1
 
         await interaction.response.send_message("**The Global Married Couples Leaderboard**\n\n"
-                       "```pl\n" + marriagelist + "```", ephemeral=show)
+                       "```pl\n" + marriagelist + "```", ephemeral=(not show))

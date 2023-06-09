@@ -146,7 +146,9 @@ class BelieverManager(app_commands.Group, name="believer"):
             database.pray(believer)
             believer = database.getBelieverByID(believer.ID)
 
-            await interaction.response.send_message(f"You prayed to {believer.God.name if believer.God else ('your ' + botutils.getGodString(believer.God))}! Your prayer power is now **{round(believer.PrayerPower, 2)}**!", ephemeral=show)
+            godname = str(believer.God.name if (believer.God and believer.God.name) else ('your ' + botutils.getGodString(believer.God)))
+
+            await interaction.response.send_message("You prayed to " + godname + "! Your prayer power is now **" + str(round(believer.PrayerPower, 2)) + "**!", ephemeral=(not show))
         else:
             time_till_pray = 30-minutes
             await interaction.response.send_message("You cannot pray to your " + botutils.getGodString(believer.God) + " yet! Time remaining: "
