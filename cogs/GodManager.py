@@ -9,7 +9,8 @@ from Util.botutils import botutils
 from Util import botutils as utilchecks
 
 
-class GodManager(app_commands.Group, name="religion"):
+@app_commands.guild_only()
+class GodManager(app_commands.Group, name="god"):
     def __init__(self, bot: discord.ext.commands.Bot):
         """Manage the religions, create new religions, and set their types as a priest."""
         super().__init__()
@@ -24,7 +25,7 @@ class GodManager(app_commands.Group, name="religion"):
         user = interaction.user
 
         if database.getBeliever(user.id, interaction.guild.id):
-            await interaction.response.send_message("You are already in a God, please leave it to create a new one using `/gods leave`!", ephemeral=True)
+            await interaction.response.send_message("You are already in a God, please leave it to create a new one!", ephemeral=True)
             return
 
         if not name:

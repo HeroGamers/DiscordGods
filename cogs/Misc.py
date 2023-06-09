@@ -9,7 +9,8 @@ import database
 from discord import Embed, Color, app_commands
 
 
-class Misc(app_commands.Group, name="miscellaneous"):
+@app_commands.guild_only()
+class Misc(app_commands.Group, name="misc"):
     hug_lines = ["{user} hugs {target}! Awaaa~", "{user} hugs {target} tightly!"]
     kiss_lines = ["{user} loves {target}!", "{user} kisses {target}!", "{user} loves {target} so, so very much!"]
     hug_gifs = ["https://cdn.discordapp.com/attachments/473953130371874828/704725705098788874/hug1.gif",

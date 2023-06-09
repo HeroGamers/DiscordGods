@@ -5,7 +5,8 @@ import database
 from Util.botutils import botutils
 
 
-class Info(app_commands.Group, name="information"):
+@app_commands.guild_only()
+class Info(app_commands.Group, name="info"):
     def __init__(self, bot: discord.ext.commands.Bot):
         """Get information about different religions, as well as Leaderboards, locally or globally."""
         super().__init__()
@@ -13,8 +14,8 @@ class Info(app_commands.Group, name="information"):
 
     # ------------ INFORMATION ------------ #
 
-    @app_commands.command(name="info")
-    async def _info(self, interaction: discord.Interaction, name: str = None):
+    @app_commands.command(name="godinfo")
+    async def _info(self, interaction: discord.Interaction, name: str = None, show: bool = False):
         """Gets information about a God."""
         if name:
             god = database.getGodName(name, interaction.guild.id)
@@ -65,14 +66,14 @@ class Info(app_commands.Group, name="information"):
         else:
             embed.set_footer(text="This God has no priest yet!",
                              icon_url=self.bot.user.avatar)
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+        await interaction.response.send_message(embed=embed, ephemeral=show)
 
     @app_commands.command(name="gods")
-    async def _list(self, interaction: discord.Interaction):
+    async def _list(self, interaction: discord.Interaction, show: bool = True):
         """Lists the top Gods on the server."""
         gods = database.getGods(interaction.guild.id)
         if not gods:
-            await interaction.response.send_message("There are no Gods in " + interaction.guild.name + ", yet... `/create <name>`", ephemeral=True)
+            await interaction.response.send_message("There are no Gods in " + interaction.guild.name + ", yet...", ephemeral=True)
             return
 
         gods = list(gods)
@@ -98,14 +99,14 @@ class Info(app_commands.Group, name="information"):
             i += 1
 
         await interaction.response.send_message("**The Gods of " + interaction.guild.name + "**\n\n"
-                       "```pl\n" + godlist + "```", ephemeral=True)
+                       "```pl\n" + godlist + "```", ephemeral=show)
 
     @app_commands.command(name="globalgods")
-    async def _globallist(self, interaction: discord.Interaction):
+    async def _globallist(self, interaction: discord.Interaction, show: bool = True):
         """Lists the top Gods globally."""
         gods = database.getGodsGlobal()
         if not gods:
-            await interaction.response.send_message("There are no Gods, yet... `/create <name>`", ephemeral=True)
+            await interaction.response.send_message("There are no Gods, yet...", ephemeral=True)
             return
 
         gods = list(gods)
@@ -139,14 +140,14 @@ class Info(app_commands.Group, name="information"):
             i += 1
 
         await interaction.response.send_message("**The Global Gods Leaderboard**\n\n"
-                       "```pl\n" + godlist + "```", ephemeral=True)
+                       "```pl\n" + godlist + "```", ephemeral=show)
 
     @app_commands.command(name="marriages")
-    async def _marriages(self, interaction: discord.Interaction):
+    async def _marriages(self, interaction: discord.Interaction, show: bool = True):
         """Lists the most loving married couples on the server."""
         marriages = database.getMarriages(interaction.guild.id)
         if not marriages:
-            await interaction.response.send_message("There are no Marriages in " + interaction.guild.name + ", yet... `/marry <someone special>`", ephemeral=True)
+            await interaction.response.send_message("There are no Marriages in " + interaction.guild.name + ", yet...", ephemeral=True)
             return
 
         marriages = list(marriages)
@@ -172,14 +173,14 @@ class Info(app_commands.Group, name="information"):
             i += 1
 
         await interaction.response.send_message("**The Married Couples of " + interaction.guild.name + "**\n\n"
-                       "```pl\n" + marriagelist + "```", ephemeral=True)
+                       "```pl\n" + marriagelist + "```", ephemeral=show)
 
     @app_commands.command(name="globalmarriages")
-    async def _globalmarriages(self, interaction: discord.Interaction):
+    async def _globalmarriages(self, interaction: discord.Interaction, show: bool = True):
         """Lists the most loving married couples globally."""
         marriages = database.getMarriagesGlobal()
         if not marriages:
-            await interaction.response.send_message("There are no Marriages, yet... `/marry <someone special>`", ephemeral=True)
+            await interaction.response.send_message("There are no Marriages, yet...", ephemeral=True)
             return
 
         marriages = list(marriages)
@@ -211,4 +212,4 @@ class Info(app_commands.Group, name="information"):
             i += 1
 
         await interaction.response.send_message("**The Global Married Couples Leaderboard**\n\n"
-                       "```pl\n" + marriagelist + "```", ephemeral=True)
+                       "```pl\n" + marriagelist + "```", ephemeral=show)

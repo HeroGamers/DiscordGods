@@ -4,7 +4,8 @@ import database
 from Util.botutils import botutils
 
 
-class AdminManager(app_commands.Group, name="administrator"):
+@app_commands.guild_only()
+class AdminManager(app_commands.Group, name="admin"):
     def __init__(self, bot: discord.ext.commands.Bot):
         """For Server Administrators to manage the Gods and how DiscordGods work on the server."""
         super().__init__()
@@ -106,4 +107,4 @@ class AdminManager(app_commands.Group, name="administrator"):
             else:
                 await interaction.response.send_message("An error occurred doing that!", ephemeral=True)
         else:
-            await interaction.response.send_message("A god with that name doesn't exist!")
+            await interaction.response.send_message("A god with that name doesn't exist!", ephemeral=True)
