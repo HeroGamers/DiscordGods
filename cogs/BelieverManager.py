@@ -9,6 +9,7 @@ from Util.botutils import botutils, MarriageConfirmUI
 from Util import botutils as utilchecks
 
 
+@app_commands.guild_only()
 class BelieverManager(app_commands.Group, name="believer"):
     def __init__(self, bot: commands.Bot):
         """For all your believer needs! Join and leave religions, get married etc."""
@@ -69,12 +70,12 @@ class BelieverManager(app_commands.Group, name="believer"):
             if name.upper() == believer.God.Name.upper():
                 await interaction.response.send_message("You are already believing in this God!", ephemeral=True)
                 return
-            await interaction.response.send_message("You are already in a God, please leave it to join a new one using `/gods leave`!", ephemeral=True)
+            await interaction.response.send_message("You are already in a God, please leave it to join a new one!", ephemeral=True)
             return
 
         god = database.getGodName(name, interaction.guild.id)
         if not god:
-            await interaction.response.send_message("There is no God by that name... yet! `/gods create <name>`", ephemeral=True)
+            await interaction.response.send_message("There is no God by that name... yet!", ephemeral=True)
             return
 
         if god.InviteOnly:
@@ -129,7 +130,7 @@ class BelieverManager(app_commands.Group, name="believer"):
 
     @app_commands.command(name="pray")
     @app_commands.check(utilchecks.isBeliever)
-    async def _pray(self, interaction: discord.Interaction):
+    async def _pray(self, interaction: discord.Interaction, show: bool = True):
         """Pray to your God."""
         believer = database.getBeliever(interaction.user.id, interaction.guild.id)
         if not believer:
@@ -145,8 +146,7 @@ class BelieverManager(app_commands.Group, name="believer"):
             database.pray(believer)
             believer = database.getBelieverByID(believer.ID)
 
-            await interaction.response.send_message("You prayed to your God! Your prayer power is now **" + str(round(believer.PrayerPower, 2))
-                           + "**!", ephemeral=True)
+            await interaction.response.send_message(f"You prayed to {believer.God.name if believer.God else ('your ' + botutils.getGodString(believer.God))}! Your prayer power is now **{round(believer.PrayerPower, 2)}**!", ephemeral=show)
         else:
             time_till_pray = 30-minutes
             await interaction.response.send_message("You cannot pray to your " + botutils.getGodString(believer.God) + " yet! Time remaining: "
@@ -170,7 +170,7 @@ class BelieverManager(app_commands.Group, name="believer"):
             await interaction.response.send_message("You are not believing in any religion!", ephemeral=True)
         elif database.getMarriage(believer1.ID):
             await interaction.response.send_message("You are already married?! What are you trying to do?! - "
-                           "Maybe you should look at getting a divorce... `/g divorce`", ephemeral=True)
+                           "Maybe you should look at getting a divorce...", ephemeral=True)
         elif not believer2:
             await interaction.response.send_message("Your special someone is not believing in any religion!", ephemeral=True)
         elif database.getMarriage(believer2.ID):

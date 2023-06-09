@@ -7,7 +7,7 @@ from Util import logger
 import Util.botutils as utilchecks
 
 
-class BotManager(app_commands.Group, name="general"):
+class BotManager(app_commands.Group, name="bot"):
     def __init__(self, bot: discord.ext.commands.Bot):
         """Where is the source code? How can I invite the bot? All these questions have their answers right here."""
         super().__init__()
@@ -16,7 +16,6 @@ class BotManager(app_commands.Group, name="general"):
     @app_commands.command(name="howto")
     async def _howto(self, interaction: discord.Interaction, category: Literal["management", "miscellaneous"]):
         """Get help on how to use Gods."""
-        prefix = "/"
         if not category:
             await interaction.response.send_message("```\n"
                            "So... You want to start a new religion. Or, maybe you want to join an already existing "
@@ -26,16 +25,16 @@ class BotManager(app_commands.Group, name="general"):
                            "  <> = required argument. [] = optional argument.\n"
                            "\n"
                            "> Creating a new religion:\n"
-                           "    " + prefix + "create <godName> [gender]   "
+                           "    /god create <godName> [gender]   "
                                              "Create a new religion. Gender is optional.\n"
                            "> Joining an already created religion:\n"
-                           "    " + prefix + "join <godName>              "
+                           "    /believer join <godName>              "
                                              "Joins a religion.\n"
                            "> Praying to your God:\n"
-                           "    " + prefix + "pray                        "
+                           "    /believer pray                        "
                                              "Prays to a God, raising it's Power and Mood, and gaining Prayer Power.\n"
                            "\n"
-                           "For more specialized help, use '" + prefix + "howto [category]'.\n"
+                           "For more specialized help, use '/bot howto [category]'.\n"
                            "Categories:\n"
                            "  Management                          "
                            "Gets help about managing a God. Directed towards Priests.\n"
@@ -50,20 +49,20 @@ class BotManager(app_commands.Group, name="general"):
                                "  <> = required argument. [] = optional argument.\n"
                                "\n"
                                "> Set your religion to invite-only:\n"
-                               "    " + prefix + "access                      "
+                               "    /god lock                      "
                                                  "Set your religion as open or invite only.\n"
                                "> Change the description of your religion:\n"
-                               "    " + prefix + "description <desc>          "
+                               "    /god description <desc>          "
                                                  "Sets a description.\n"
                                "> Invite someone to your religion:\n"
-                               "    " + prefix + "invite <mention or ID>      "
+                               "    /god invite <mention or ID>      "
                                                  "Invites said user to your religion.\n"
                                "> Set the gender of your God:\n"
-                               "    " + prefix + "setgender <gender>          "
+                               "    /god setgender <gender>          "
                                                  "Changes the gender of your God. Examples include female and "
                                                  "sexless.\n"
                                "> Set the type of your God:\n"
-                               "    " + prefix + "settype <type>              "
+                               "    /god settype <type>              "
                                                  "Example types include Love, War and Thunder.\n"
                                "```", ephemeral=True)
             elif (category.lower() == "misc") or (category.lower() == "miscellaneous"):
@@ -73,15 +72,15 @@ class BotManager(app_commands.Group, name="general"):
                                "  <> = required argument. [] = optional argument.\n"
                                "\n"
                                "> Marrying someone:\n"
-                               "    " + prefix + "marry <mention or ID>       "
+                               "    /believer marry <user>       "
                                                  "Proposes to marry someone. The person you marry must believe in the "
                                                  "same religion as you.\n"
                                "> Loving/kissing your lover:\n"
-                               "    " + prefix + "love                        "
+                               "    /misc love                        "
                                                  "Kisses your special someone, bringing you to the top of the"
                                                  "marriage list. This costs no Prayer Power.\n"
                                "> Hug someone:\n"
-                               "    " + prefix + "hug <mention or ID>         "
+                               "    /misc hug <user>         "
                                                  "Hugs someone - Costs 0.5 Prayer Power.\n"
                                "```", ephemeral=True)
             else:
