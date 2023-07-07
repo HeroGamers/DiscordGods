@@ -12,24 +12,40 @@ from Util import logger
 # Initiation of database
 if os.getenv('db_type') is not None and os.getenv('db_type').upper() == "MYSQL":
     host = "localhost"
-    if os.getenv('db_host'):
+    if os.getenv("MARIADB_HOST"):
+        host = os.getenv("MARIADB_HOST")
+    elif os.getenv('db_host'):
         host = os.getenv('db_host')
     else:
         print("Database host is empty, using " + host + " as host...")
 
     user = "root"
-    if os.getenv('db_user'):
+    if os.getenv("MARIADB_USER"):
+        user = os.getenv("MARIADB_USER")
+    elif os.getenv('db_user'):
         user = os.getenv('db_user')
     else:
         print("Database user is empty, using " + user + " as user...")
 
     port = "3306"
-    if os.getenv('db_port'):
+    if os.getenv("MARIADB_PORT"):
+        port = os.getenv("MARIADB_PORT")
+    elif os.getenv('db_port'):
         port = os.getenv('db_port')
     else:
         print("Database port is empty, using " + port + " as port...")
 
-    db = MySQLDatabase('gods', user=user, password=os.getenv('db_pword'), host=host,
+    database_name = "gods"
+    if os.getenv('MARIADB_DATABASE'):
+        database_name = os.getenv('MARIADB_DATABASE')
+
+    password = None
+    if os.getenv("MARIADB_PASSWORD"):
+        password = os.getenv("MARIADB_PASSWORD")
+    elif os.getenv('db_pword'):
+        password = os.getenv('db_pword')
+
+    db = MySQLDatabase(database_name, user=user, password=password, host=host,
                        port=int(port))
 
     # Check for possible connection issues to the db

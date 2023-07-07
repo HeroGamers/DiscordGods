@@ -1,10 +1,3 @@
-# Import the config
-try:
-    import config
-except ImportError:
-    print("Couldn't import config.py! Exiting!")
-    exit()
-
 import asyncio
 import discord
 from discord.ext.commands._types import BotT
