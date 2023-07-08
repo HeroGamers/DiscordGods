@@ -2,7 +2,7 @@ import json
 import os
 import requests
 from discord.ext import commands, tasks
-import dbl
+# import dbl
 from Util import logger
 
 
@@ -19,7 +19,7 @@ class BotLists(commands.Cog):
         self.topgg = None  # top.gg
 
     async def cog_load(self):
-        self.topgg = dbl.DBLClient(self.bot, self.topgg_token)
+        # self.topgg = dbl.DBLClient(self.bot, self.topgg_token)
         self.update_stats.start()
 
     async def cog_unload(self) -> None:
@@ -35,11 +35,12 @@ class BotLists(commands.Cog):
 
         # top.gg
         site = "top.gg"
-        try:
-            await self.topgg.post_guild_count()
-            logger.logDebug('Posted server count to ' + site + ' ({})'.format(self.topgg.guild_count()), "INFO")
-        except Exception as e:
-            logger.logDebug('Failed to post server count to ' + site + ': {} - {}'.format(type(e).__name__, e), "INFO")
+        if self.topgg:
+            try:
+                await self.topgg.post_guild_count()
+                logger.logDebug('Posted server count to ' + site + ' ({})'.format(self.topgg.guild_count()), "INFO")
+            except Exception as e:
+                logger.logDebug('Failed to post server count to ' + site + ': {} - {}'.format(type(e).__name__, e), "INFO")
 
         # discord.bots.gg
         site = "discord.bots.gg"

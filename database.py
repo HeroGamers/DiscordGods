@@ -11,67 +11,69 @@ from Util import logger
 
 # Initiation of database
 if os.getenv('db_type') is not None and os.getenv('db_type').upper() == "MYSQL":
-    host = "localhost"
-    if os.getenv("MARIADB_HOST"):
-        host = os.getenv("MARIADB_HOST")
-    elif os.getenv('db_host'):
-        host = os.getenv('db_host')
-    else:
-        print("Database host is empty, using " + host + " as host...")
+    while True:
+        host = "localhost"
+        if os.getenv("MARIADB_HOST"):
+            host = os.getenv("MARIADB_HOST")
+        elif os.getenv('db_host'):
+            host = os.getenv('db_host')
+        else:
+            print("Database host is empty, using " + host + " as host...")
 
-    user = "root"
-    if os.getenv("MARIADB_USER"):
-        user = os.getenv("MARIADB_USER")
-    elif os.getenv('db_user'):
-        user = os.getenv('db_user')
-    else:
-        print("Database user is empty, using " + user + " as user...")
+        user = "root"
+        if os.getenv("MARIADB_USER"):
+            user = os.getenv("MARIADB_USER")
+        elif os.getenv('db_user'):
+            user = os.getenv('db_user')
+        else:
+            print("Database user is empty, using " + user + " as user...")
 
-    port = "3306"
-    if os.getenv("MARIADB_PORT"):
-        port = os.getenv("MARIADB_PORT")
-    elif os.getenv('db_port'):
-        port = os.getenv('db_port')
-    else:
-        print("Database port is empty, using " + port + " as port...")
+        port = "3306"
+        if os.getenv("MARIADB_PORT"):
+            port = os.getenv("MARIADB_PORT")
+        elif os.getenv('db_port'):
+            port = os.getenv('db_port')
+        else:
+            print("Database port is empty, using " + port + " as port...")
 
-    database_name = "gods"
-    if os.getenv('MARIADB_DATABASE'):
-        database_name = os.getenv('MARIADB_DATABASE')
+        database_name = "gods"
+        if os.getenv('MARIADB_DATABASE'):
+            database_name = os.getenv('MARIADB_DATABASE')
 
-    password = None
-    if os.getenv("MARIADB_PASSWORD"):
-        password = os.getenv("MARIADB_PASSWORD")
-    elif os.getenv('db_pword'):
-        password = os.getenv('db_pword')
+        password = None
+        if os.getenv("MARIADB_PASSWORD"):
+            password = os.getenv("MARIADB_PASSWORD")
+        elif os.getenv('db_pword'):
+            password = os.getenv('db_pword')
 
-    db = MySQLDatabase(database_name, user=user, password=password, host=host,
-                       port=int(port))
+        print("Connecting to database " + database_name + " on " + host + ":" + port + " as " + user + "...")
 
-    # Check for possible connection issues to the db
-    try:
-        db.connection()
-    except Exception as e:
-        if "Can't connect" in str(e):
-            print("An error occured while trying to connect to the MySQL Database: " + str(e) + ". Using flatfile...")
-            db = SqliteDatabase('./Gods.db')
-        elif "Unknown database" in str(e):
-            print("An error occured while trying to connect to the MySQL Database: " + str(e) +
-                  ". Trying to create database...")
-            try:
-                conn = pymysql.connect(host=host, user=user, password=os.getenv('db_pword'), port=int(port))
-                conn.cursor().execute('CREATE DATABASE gods')
-                conn.close()
-                print("Created Database!")
-            except Exception as e:
-                print("An error occured while trying to create the gods Database: " + str(e) + ". Using flatfile...")
-                db = SqliteDatabase('./Gods.db', pragmas={'foreign_keys': 1})
-    except InternalError as e:
-        print("An error occured while trying to use the MySQL Database: " + str(e) + ". Mi...")
-        db = SqliteDatabase('./Gods.db')
+        db = MySQLDatabase(database_name, user=user, password=password, host=host,
+                           port=int(port))
+
+        # Check for possible connection issues to the db
+        try:
+            db.connection()
+            break
+        except Exception as e:
+            if "Can't connect" in str(e):
+                print("An error occured while trying to connect to the MySQL Database: " + str(e) + ". Trying again...")
+            elif "Unknown database" in str(e):
+                print("An error occured while trying to connect to the MySQL Database: " + str(e) +
+                      ". Trying to create database...")
+                try:
+                    conn = pymysql.connect(host=host, user=user, password=password, port=int(port))
+                    conn.cursor().execute('CREATE DATABASE ' + database_name)
+                    conn.close()
+                    print("Created Database!")
+                    break
+                except Exception as e:
+                    print("An error occured while trying to create the gods Database: " + str(e) + ". Trying again...")
+        except InternalError as e:
+            print("An error occured while trying to use the MySQL Database: " + str(e) + ". Trying again...")
 else:
     print("Database type is not set to MYSQL, using flatfile...")
-    db = SqliteDatabase('./Gods.db')
+    db = SqliteDatabase('./Gods.db', pragmas={'foreign_keys': 1})
 
 # Constant variables
 snowflake_max_length = 20  # It is currently 18, but max size of uint64 is 20 chars

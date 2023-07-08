@@ -25,6 +25,8 @@ services:
       - database.env
     volumes:
       - db-data:/var/lib/mysql
+    ports:
+      - "127.0.0.1:3307:3306"
     networks:
       - discordgods-network
 volumes:
