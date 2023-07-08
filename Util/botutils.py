@@ -219,6 +219,20 @@ class botutils:
             logger.logDebug("User found! - %s" % user.name)
             return user
 
+        if guild:
+            try:
+                user = guild.get_member(userid)
+            except Exception as e:
+                logger.logDebug("Member not found - guild get - %s" % e)
+            if not user:
+                try:
+                    user = await guild.fetch_member(userid)
+                except Exception as e:
+                    logger.logDebug("Member not found - guild fetch - %s" % e)
+        if user:
+            logger.logDebug("User found! - %s" % user.name)
+            return user
+
         try:
             user = await bot.fetch_user(userid)
         except Exception as e:
