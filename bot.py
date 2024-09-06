@@ -15,7 +15,7 @@ except ImportError:
 TEST_GUILD = discord.Object(id=473953130371874826)
 
 
-class DiscordGods(discord.ext.commands.Bot):
+class DiscordGods(discord.ext.commands.AutoShardedBot):
     def __init__(self, command_prefix, *, intents: discord.Intents,
                  **options: Any) -> None:
         super().__init__(command_prefix=command_prefix, intents=intents, options=options)
@@ -41,7 +41,7 @@ class DiscordGods(discord.ext.commands.Bot):
 
 
 intents = discord.Intents.default()
-bot: discord.ext.commands.Bot = DiscordGods(intents=intents, description='Religion has never been easier!',
+bot: discord.ext.commands.AutoShardedBot = DiscordGods(intents=intents, description='Religion has never been easier!',
                                             command_prefix=os.getenv("prefix"),
                                             activity=discord.Game(name="with religions | /bot howto"))
 
